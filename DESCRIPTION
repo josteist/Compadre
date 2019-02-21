@@ -1,13 +1,13 @@
 Package: Compadre
-Title: What the Package Does (One Line, Title Case)
+Title: Analysis of Macroevolutionary Rates of Specietion, Extinction and Sampling using Capture-Mark-Recapture techniques
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Jostein",
+           family = "Starrfelt",
            role = c("aut", "cre"),
-           email = "first.last@example.com")
-Description: What the package does (one paragraph).
-License: What license it uses
+           email = "josteinstarrfelt@gmail.com")
+Description: Estimating rates of speciation, extinction and sampling from a set of fossil occurrances over a given number of intervals. The package allows for inclusion of multiple drivers of all rates as well as estimation of impacts of diversity on the rates (diversity dependence).
+License: Do what you want, but please acknowledge my work.
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
