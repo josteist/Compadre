@@ -86,7 +86,7 @@ sim_BD_func <- function(spec=function(t,n){0.1},
         t_now = t_now + dxt;
         # New species
         alive_now = c(alive_now,txmax+1);
-        if (txmax>dim(Times)[1]){
+        if (txmax>(-1+dim(Times)[1])){
           # Times = array(NA,c(dim(Times)[1]*2,dim(Times)[2]));
           Times = rbind(Times,array(NA,c(dim(Times)[1],dim(Times)[2])))
         }

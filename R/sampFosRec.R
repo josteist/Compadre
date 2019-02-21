@@ -25,7 +25,7 @@ sampFosRec <- function(orig,ext,samp){
     dxt   = (-orig+ext)/1000; # 1000 bins for each longevity?
     Fos = c();
     while (t_now<ext){
-      if (runif(1)<max(0,samp(t_now,t_now-orig))*dxt){
+      if (runif(1)<max(0,samp(t_now))*dxt){
         Fos = c(Fos,t_now)}
       t_now <- t_now + dxt;
     }
