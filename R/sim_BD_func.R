@@ -8,8 +8,6 @@
 #' @param n_init Initial number of lineages. Defaults to 100.
 #' @param dt_ints Array of 'intervals' in which to generate the fossil record, as an array of interval durations. All lineages sampled within these intervals are placed in the interval, regardless of precise time it was sampled for the output \emph{FosRec}. Defaults to rep(1,10)
 #' @return A named list with \emph{Taxa} (time of origin and extinction of all taxa), \emph{Foss} (list of all fossilization/sampling event for all taxa), \emph{FosRec} (occurrence matrix with dimensions sampled species by intervals). The remainding entries in the list are the inputs given to the function, \emph{dts, Spec, Ext, Samp, n_init} 
-#' @example
-#' Js <- sim_BD_func(spec=function(t,n){0.4-0.001*n},ext=0.2,dts=rep(2,10))
 #' 
 #' @export
 
