@@ -1,6 +1,6 @@
 Package: Compadre
 Title: Analysis of Macroevolutionary Rates of Specietion, Extinction and Sampling using Capture-Mark-Recapture techniques
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     person(given = "Jostein",
            family = "Starrfelt",
@@ -10,4 +10,6 @@ Description: Estimating rates of speciation, extinction and sampling from a set 
 License: Do what you want, but please acknowledge my work.
 Encoding: UTF-8
 LazyData: true
+Imports:
+	mvtnorm
 RoxygenNote: 6.1.1
