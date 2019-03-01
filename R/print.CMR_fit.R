@@ -8,7 +8,7 @@ print.CMR_fit <- function(fit){
   print(fit$Call)
   cat('\n')
   cat('\n')
-  cat('Size of chain ',dim(fit$Chain))
+  cat('Size of chain ',dim(fit$Chain),'\n')
   cat('Type plot(fit) to plot estimated rates.')
 
 }

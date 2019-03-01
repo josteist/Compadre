@@ -9,6 +9,7 @@ make_unvd <- function(Obs){
   # n - number of observed individuals/species over time
   # u - number of invididuals/species seen for the first time at t
   # v - number of individuals/species seen for the last time at
+  Obs = 1*Obs>0; # In case somebody inputs other than presence/absences.
   fu = function(x){min(which(x>0))}
   tmpu = apply(Obs,1,fu)
   u = array(0,dim(Obs)[2])
