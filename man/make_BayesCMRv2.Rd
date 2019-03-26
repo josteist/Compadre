@@ -31,7 +31,7 @@ make_BayesCMRv2(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
 
 \item{priorsNorm_Mus}{sets the parameters for the normal prior for the (log) mean speciation, extinction and sampling rates. Given as a list of three entries with (mu,sd). Defaults to rep(list(c(-4,4)),3), i.e. all normal priors with mu=-4 and sd=3.}
 
-\item{priorsUnif}{sets the parameters for the uniform prior for the log variances of the random effects. Same for all three variances, dunif(-3,3).}
+\item{priorsUnif}{sets the parameters for the uniform prior for the log variances of the random efSpecTS. Same for all three variances, dunif(-3,3).}
 
 \item{replRE_1}{a switch for how to deal with very special drivers. Not fully implemented or tested properly.}
 }
@@ -45,4 +45,6 @@ This function generates a structure containing the necessary functions for a CMR
 mod1 <- make.BayesCMR(Obs)
 fit <- MCMC_CMR(mod1)
 matplot(fit$Chain[,1:3],type="l")
+This version implements the speciation and extinction rates using the length of the bins, not the
+inter-bin midpoint difference.
 }
