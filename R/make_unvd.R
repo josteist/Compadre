@@ -3,6 +3,7 @@
 #' This function takes an observation matrix \emph{Obs} and generates the vectors u,n,v needed to calculate the Pradel likelihood. Used internally by other functions.
 #' @param Obs a matrix with size \emph{number of taxa} by \emph{number of intervals}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis.
 #' @return a list containing \emph{Obs}, \emph{u,n,v} and \emph{d}.
+#' @export
 
 make_unvd <- function(Obs){
   # Extracting u,n,v,d from an observational matrix.

@@ -11,10 +11,10 @@
 #'
 #' @export
 
-sim_BD_func <- function(spec=function(t,n){0.1},
-                        ext=function(t,n){0.001},
-                        samp = function(t){0.3},
-                        n_init=100,dt_ints=rep(1,10)){
+sim_BD_func_v2 <- function(spec=function(t,n){0.1},
+                           ext=function(t,n){0.001},
+                           samp = function(t){0.3},
+                           n_init=100,dt_ints=rep(1,10)){
   # Simulating a birth death process with spec and ext
   # as functions of (time, n_species now). Output
   # is matrix of origination and extinction times. Speciation is budding.
@@ -36,7 +36,7 @@ sim_BD_func <- function(spec=function(t,n){0.1},
   # Obs[1:n_init,1]  = runif(n_init)>samp*1
   # inxtmp = n_init;
   # So we need to integrate forwards in time.
-  dxt = min(dt_ints)/10000; #temporal resolution
+  dxt = min(dt_ints)/(1000*n_init); #temporal resolution
   # Think we collect start and end of all species
   # first
   t_now = 0;
@@ -64,6 +64,8 @@ sim_BD_func <- function(spec=function(t,n){0.1},
       event <- sample.int(3,1,prob=c(1-(sp_now+ex_now),sp_now,ex_now));
       #if 1 (nothing), 2 speciate, 3 die
       # Random who it happens to
+      # This is not right, we cannot take the rate and multiply by the number of lines and then transform to probability?
+      # We should make a probability of an event for each line, then draw number of lineages in which an event will occur. If this is >1 at the same time, reduce dxt
 
       # We need to make sure that these event probs are low,
       # if not we are linearizing the system.
@@ -101,16 +103,20 @@ sim_BD_func <- function(spec=function(t,n){0.1},
       if (length(alive_now)==0){
         t_now = sum(dt_ints);
       }
-    }
-    # print(c(sp_now,ex_now,event,t_now/sum(dt_ints),dxt))
+
     if ((sp_now+ex_now)>1/4){
       dxt = dxt/2; # half the stepsize
+      print(c(sp_now,ex_now,event,t_now/sum(dt_ints),dxt))
+
 
     }
     else if (max(sp_now,ex_now)<1e-6){
       dxt = dxt*2; # double the stepsize
-    }
+      print(c(sp_now,ex_now,event,t_now/sum(dt_ints),dxt))
 
+    }
+    # print(c(sp_now,ex_now,dxt))
+    }
     # do<- alive_now;
     #   # which(Alive[,tt-1]==1);
     # speciate <- sample(alive_now,
