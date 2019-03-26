@@ -1,6 +1,8 @@
+
 #' Function to construct CMR-model.
 #'
 #' This function generates a structure containing the necessary functions for a CMR analysis of a fossil dataset.
+#'
 #' @param Obs a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.
 #' @param dts a vector of interval durations. Defaults to a series of 1's if not supplied. Oldest interval is first entry.
 #' @param RE  a vector of TRUE/FALSE statements whether or not to allow rates to vary across intervals for speciation, extinction and sampling rates, respectively. Defaults to c(FALSE, FALSE, FALSE)
@@ -11,21 +13,33 @@
 #' @param pfix a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.
 #' @param priorsNorm_Cov sets the parameters for the normal prior for the impact of the drivers. Defaults to Norm(mu=0,sd=2).
 #' @param priorsNorm_Mus sets the parameters for the normal prior for the (log) mean speciation, extinction and sampling rates. Given as a list of three entries with (mu,sd). Defaults to rep(list(c(-4,4)),3), i.e. all normal priors with mu=-4 and sd=3.
-#' @param priorsUnif sets the parameters for the uniform prior for the log variances of the random effects. Same for all three variances, dunif(-3,3).
+#' @param priorsUnif sets the parameters for the uniform prior for the log variances of the random efSpecTS. Same for all three variances, dunif(-3,3).
 #' @param replRE_1 a switch for how to deal with very special drivers. Not fully implemented or tested properly.
 #' @return The function returns an object of class CMR_model. This most important output is out$probfun which is a function for the posterior. This output can be fed directly into the sampler \link{MCMC_CMR}. It also returns \emph{Obs} and \emph{dts} as well as the full call (exlcluding default settings), \emph{call}
 #' @export
 #' @examples mod1 <- make.BayesCMR(Obs)
 #' fit <- MCMC_CMR(mod1)
 #' matplot(fit$Chain[,1:3],type="l")
+#' This version implements the speciation and extinction rates using the length of the bins, not the
+#' inter-bin midpoint difference.
 
 make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
-                          RE=c(FALSE,FALSE,FALSE),
-                          SpecTS=NULL,ExtTS=NULL,SmpTS=NULL,
-                          DivDep=c(FALSE,FALSE),pfix=2,priorsNorm_Cov=c(0,2),
-                          priorsNorm_Mus = rep(list(c(-4,4)),3),
-                          priorsUnif=c(-3,3),replRE_1 = F){
+                             RE=c(FALSE,FALSE,FALSE),
+                             SpecTS=NULL,ExtTS=NULL,SmpTS=NULL,
+                             DivDep=c(FALSE,FALSE),pfix=2,priorsNorm_Cov=c(0,2),
+                             priorsNorm_Mus = rep(list(c(-4,4)),3),
+                             priorsUnif=c(-3,3),replRE_1 = F){
+  # Model generating function for a Compadre analysis.
+  # Minimum input is a matrix of observed/unobserved of dimensions
+  # taxa by temporal interval. dts is vector of interval
+  # durations (default sets to 1).
 
+ # v2 is as main version of 26.03.2019, BUT with one exception. For seniorities
+  # and extinction probabilities in the pradel likelihood the time between
+  # midpoints is used and not the proper interval durations.
+    # Input checks to code in
+  # check dimensions of Obs vs dts, obs vs SpecTS,exts,SmpTS
+  #
   ## INPUT CHECKS
   fullcall <- deparse(match.call());
 
@@ -52,22 +66,6 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
       stop("Size of sampling rate drivers does not match dimension of Obs. ExtTS should be of NCOL==(dim(Obs)[2])")
     }
   }
-  # Stuff that needs fixing;
-  # - checks for dimensionality of intputs (obs, dts, TS)
-  # - checks for 'good' models. I.e. divdep w/o varying rates.
-  # - need to implement 'normalizing' the drivers. I thought this was here, but it's not.
-
-
-  # Model generating function for a Compadre analysis.
-  # Minimum input is a matrix of observed/unobserved of dimensions
-  # taxa by temporal interval. dts is vector of interval
-  # durations (default sets to 1).
-
-
-  # Input checks to code in
-  # check dimensions of Obs vs dts, obs vs SpecTS,exts,SmpTS
-  #
-
   # Obs - matrix of observations (absence/presence) of dimensions (species by intervals)
   # dts - duration of intervals (can be named?)
   # RE  - use Random efSpecTS for [speciation, extinction, sampling] rates respectively T/F(default)
@@ -111,9 +109,10 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
   # 1. identify which par and which interval.
   # 2. Then it might be easier to make index arrays outside the if statements.
   # This will only be an issue under RE=T and supplied TS. DONE
-  undv <- Compadre:::make_unvd(Obs);
+  undv <- make_unvd(Obs);
+  ts = list(SpecTS,ExtTS,SmpTS)
   # Calcing these here, in case they are accidentaly changed in the globalEnv.
-  u = undv$u;
+  u =undv$u;
   v = undv$v;
   n = undv$n;
   d = undv$d;
@@ -125,7 +124,6 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
   # can I define the prior cumulatively? just add no.
   # dim(array) yields NULL, which is annnoying.
   # checking the dimension of the covariates for each par
-  # Keeping the originals before normalizing.
   origSpecTS = SpecTS;
   origSmpTS = SmpTS;
   origExtTS = ExtTS;
@@ -133,7 +131,7 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
     # if not null, is it 1 or more cvts?
     if (is.null(dim(SpecTS))){
       nSpecTS = 1;
-    # Normalizing: 290119 - made internal to function
+      # Normalizing: 290119 - made internal to function
       SpecTS = normfun(origSpecTS);
     } else {
       nSpecTS = dim(SpecTS)[1];
@@ -162,6 +160,8 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
   } else {nSmpTS=0}
   ts = list(SpecTS,ExtTS,SmpTS) # storing normalized drivers.
   ts_orig = list(origSpecTS,origExtTS,origSmpTS)
+
+
   nhps <- 3+sum(RE*1)+sum(DivDep*1) + nSmpTS+nExtTS+nSpecTS; # number of mean+hyperparameters
   nTS  <- c(nSpecTS,nExtTS,nSmpTS);
   # ALL x-arrays endd with the RE's, so all indexes below here that are not the first 3+sum(RE) sohuld have sum(DivDep) added to them.
@@ -192,15 +192,18 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lfec = rep(x[1],length(dts)-1);
       lext = rep(x[2],length(dts)-1);
       lsmp = rep(x[3],length(dts));
-      ll <- pradel_unvd(
-        # Actually, these should be the difference
-        # fec = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lfec[ii]),dts[ii]/2+dts[ii+1]/2)}),
-        # fec = sapply(1:(length(dts)-1),function(ii){(exp(lfec[ii])*(dts[ii]/2+dts[ii+1]/2))}),
-        fec = sapply(1:(length(dts)-1),function(ii){((1+(exp(lfec[ii])))^(dts[ii]/2+dts[ii+1]/2)-1)/(dts[ii]/2+dts[ii+1]/2)}),
-        ext = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lext[ii]),dts[ii]/2+dts[ii+1]/2)}),
+
+      ll <- pradel_unvd_gam(
+        ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+            (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii]))}),
+        gam <- sapply(1:(length(dts)-1),function(ii){
+          (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+             (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii])))/
+            exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))}),
         p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp[ii]),dts[ii])}),
         u,n,v,d);
-      # ll$LogL <- ll$LogL + sum(dnorm(x[1:3],nprs2[1],nprs2[2],log=T));
+
       # For different priors for the three global rates
       ll$LogL <- ll$LogL + sum(sapply(1:3,function(ii){dnorm(x[ii],nprs2[[ii]][1],nprs2[[ii]][2],log=T)}))
       if (is.infinite(ll$LogL)){ll$LogL = -Inf};
@@ -216,15 +219,17 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lfec = rep(x[1],length(dts)-1);
       lext = rep(x[2],length(dts)-1);
       lsmp = rep(x[3],length(dts));
-      ll <- pradel_unvd(
-        # Actually, these should be the difference
-        # fec = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lfec[ii]),dts[ii]/2+dts[ii+1]/2)}),
-        # fec = sapply(1:(length(dts)-1),function(ii){(exp(lfec[ii])*(dts[ii]/2+dts[ii+1]/2))}),
-        fec = sapply(1:(length(dts)-1),function(ii){((1+(exp(lfec[ii])))^(dts[ii]/2+dts[ii+1]/2)-1)/(dts[ii]/2+dts[ii+1]/2)}),
-        ext = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lext[ii]),dts[ii]/2+dts[ii+1]/2)}),
+
+      ll <- pradel_unvd_gam(
+        ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+            (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii]))}),
+        gam <- sapply(1:(length(dts)-1),function(ii){
+          (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+             (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii])))/
+            exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))}),
         p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp[ii]),dts[ii])}),
         u,n,v,d);
-      # ll$LogL <- ll$LogL + sum(dnorm(x[1:3],0,5,log=T));
       if (is.infinite(ll$LogL)){ll$LogL = -Inf};
       if (is.na(ll$LogL)){ll$LogL = -Inf};
       if (is.nan(ll$LogL)){ll$LogL = -Inf};
@@ -471,12 +476,15 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lfec = ltmpfun[[1]](x) + ltmpfun[[4]](x);#rep(x[1],length(dts)-1);
       lext = ltmpfun[[2]](x) + ltmpfun[[5]](x);
       lsmp = ltmpfun[[3]](x);
-      ll <- pradel_unvd(
-        # Actually, these should be the difference
-        # fec = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lfec[ii]),dts[ii]/2+dts[ii+1]/2)}),
-        # fec = sapply(1:(length(dts)-1),function(ii){(exp(lfec[ii])*(dts[ii]/2+dts[ii+1]/2))}),
-        fec = sapply(1:(length(dts)-1),function(ii){((1+(exp(lfec[ii])))^(dts[ii]/2+dts[ii+1]/2)-1)/(dts[ii]/2+dts[ii+1]/2)}),
-        ext = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lext[ii]),dts[ii]/2+dts[ii+1]/2)}),
+
+      ll <- pradel_unvd_gam(
+        ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+            (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii]))}),
+        gam <- sapply(1:(length(dts)-1),function(ii){
+          (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+             (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii])))/
+            exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))}),
         p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp[ii]),dts[ii])}),
         u,n,v,d);
       return(ll)
@@ -494,22 +502,21 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lfec = ltmpfun[[1]](x) + ltmpfun[[4]](x);#rep(x[1],length(dts)-1);
       lext = ltmpfun[[2]](x) + ltmpfun[[5]](x);
       lsmp = ltmpfun[[3]](x);
-      ll <- pradel_unvd(
-        # Actually, these should be the difference
-        # fec = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lfec[ii]),dts[ii]/2+dts[ii+1]/2)}),
-        # fec = sapply(1:(length(dts)-1),function(ii){(exp(lfec[ii])*(dts[ii]/2+dts[ii+1]/2))}),
-        fec = sapply(1:(length(dts)-1),function(ii){((1+(exp(lfec[ii])))^(dts[ii]/2+dts[ii+1]/2)-1)/(dts[ii]/2+dts[ii+1]/2)}),
-        ext = sapply(1:(length(dts)-1),function(ii){rate2prob(exp(lext[ii]),dts[ii]/2+dts[ii+1]/2)}),
+      ll <- pradel_unvd_gam(
+        ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+            (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii]))}),
+        gam <- sapply(1:(length(dts)-1),function(ii){
+          (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2)))-1))/
+             (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))))-exp(lext[ii])))/
+            exp((exp(lfec[ii])-exp(lext[ii]))*(dts[ii]/2+dts[ii+1]/2))}),
         p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp[ii]),dts[ii])}),
         u,n,v,d);
       ll$LogL <- ll$LogL +
         sum(sapply(1:3,function(ii){dnorm(x[ii],nprs2[[ii]][1],nprs2[[ii]][2],log=T)})) +
-        # sum(dnorm(x[1:3],nprs2[1],nprs2[2],log=T)) + # prior for main efSpecTS
         sum(unlist(sapply(1:3,function(a){ptmpfun[[a]](x)}))) +
         (sum(RE)>0)*sum(dunif(x[seq(4,length.out=sum(RE))],priun[1],priun[2],log=T)) + #prior for log(sd(RE)), 0 if RE=c(F;F;F)
-        # switch(1+1*(sum(RE)>0),0,sum(dunif(x[seq(4,length.out=sum(RE))],-3,3,log=T))) + #prior for log(sd(RE)), 0 if RE=c(F;F;F)
         (nhps>(4+sum(RE)))*sum(dnorm(x[seq(4+sum(RE),nhps)],nprs1[1],nprs1[2],log=T)); # prior for covariate efSpecTS.
-      # The prior comes in here, so cut out ptmpfun[[4]]
 
       # SHould the prior for the log(sd(RE)) be dnorm(0,5)
       if (is.infinite(ll$LogL)){ll$LogL = -Inf};
@@ -523,6 +530,6 @@ make_BayesCMRv2 <- function(Obs,dts=rep(1,dim(Obs)[2]),
   out <- list(probfun= myf,likfun=myll,npar = tix-1,ratefunc= ltmpfun,nhps=nhps,aix = alphinx,ts=ts,ts_orig=ts_orig,lns=lns,priorfun=ptmpfun,n_est=n_est,n_norm=n_norm,reix=reix,Obs=Obs,dts=dts,
               date=date(),call=fullcall);
   attr(out,"class")<-"CMR_model"
-    return(out)
+  return(out)
+  # return(list(probfun= myf,likfun=myll,npar = tix-1,ratefunc= ltmpfun,nhps=nhps,aix = alphinx,ts=ts,lns=lns,priorfun=ptmpfun,n_est=n_est,n_norm=n_norm,reix=reix,Obs=Obs,dts=dts))
 }
-
