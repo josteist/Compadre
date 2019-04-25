@@ -1,5 +1,5 @@
 Package: Compadre
-Title: Analysis of Macroevolutionary Rates of Specietion, Extinction and Sampling using Capture-Mark-Recapture techniques
+Title: Kick-ass Analysis of Macroevolutionary Rates of Speciation, Extinction and Sampling using Capture-Mark-Recapture techniques
 Version: 0.0.1
 Authors@R: 
     person(given = "Jostein",
