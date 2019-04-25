@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_BayesCMR.R
 \name{make_BayesCMR}
 \alias{make_BayesCMR}
-\title{Function to construct CMR-model.}
+\title{Function to construct one clade CMR-model.}
 \usage{
 make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
   FALSE), SpecTS = NULL, ExtTS = NULL, SmpTS = NULL,

@@ -22,7 +22,9 @@
 library(devtools)
 setwd("\Documents")
 # install.packages("Compadre")
-setwd("C:/Users/jostest/Documents/Compadre")
+
+setwd("C:/Users/josteist/Documents/Compadre")
+
 document()
 setwd("C:/Users/josteist/Documents/")
 install('Compadre')
@@ -30,13 +32,72 @@ install('Compadre')
 
 library(Compadre)
 # Made a couple of changes, commit them now, push later
+stages = GSA_timescale[GSA_timescale$scale_level==5,]
+do = seq(90,8,by=-1)
+stages[do,]$interval_name
+dts = rev(stages$max_ma-stages$min_ma)[do]
+Obs = (1*(InvertPBDB>0))[,do]
+Obs <- Obs[which(rowSums(Obs)>0),]
+
+m1 <- make_BayesCMR(Obs,dts=dts,RE=c(T,T,T))
+m2 <- make_BayesCMR(Obs,dts=dts)
+ft <- MCMC_CMR(m2,niter=1e5,nthin=200)
+
+myESS(ft)
+
+f1 <- MCMC_CMR(m1,niter=5e7,draweps=1e3,nthin=1e4)
+f2 <- MCMC_CMR(m1,niter=1e6,draweps=1e3,nthin=1e3,cvstp = f1$Covs,
+               x0=f1$Chain[5000,])
+fx <- MCMC_CMR(m1,niter=1e7,draweps=1e4,nthin=1e2,vmin=1e-2)
+plot(f1,botcols=(stages[do,]$color))
+matplot(f1$Chain[,1:3],type="l")
 
 
 library('Compadre')
-S2 <- sim_BD_func_v2(spec=function(t,n){.5+sin(t)*0.4},#max(1e-8,0.8-0.1*log(n))},
-                  ext = function(t,n){.4+cos(t-pi/2)*0.3},#0.4-.3*(t>12)},
-                  samp = function(t,n){0.4},
-                  dt_ints=rep(c(.5,2,3,1),5),n_init=200)
+S2 <- sim_BD_func_v2(spec=function(t,n){.23+sin(t)*0.1},#max(1e-8,0.8-0.1*log(n))},
+                  ext = function(t,n){.2+sin(t-pi/2)*0.07},#0.4-.3*(t>12)},
+                  samp = function(t,n){3.3},n_init=100,
+                  dt_ints=rep(0.5,3))#rep(c(.5,4),6))
+tmp <- Foote_percap(1*(S2$FosRec>0),S2$dts)
+plot(cumsum(S2$dts),tmp$p_hat,type="o",ylim=c(0,.6))
+lines(cumsum(S2$dts),tmp$q_hat,type="o",col='red')
+lines(seq(0,sum(S2$dts),by=0.5),S2$Spec(seq(0,sum(S2$dts),by=0.5),0),lty=3)
+lines(seq(0,sum(S2$dts),by=0.5),S2$Ext(seq(0,sum(S2$dts),by=0.5),0),lty=3,col='red')
+
+
+
+S1 <- sim_BD_func_v2(spec=function(t,n){.53+sin(t)*0.3},#max(1e-8,0.8-0.1*log(n))},
+                     ext = function(t,n){.4+sin(t-pi/2)*0.07},#0.4-.3*(t>12)},
+                     samp = function(t,n){3.3},n_init=100,
+                     dt_ints=rep(0.5,5))#rep(c(.5,4),6))
+m1 <- make_BayesCMR(S1$FosRec>0,dts=S1$dts)
+
+m2 <- make_BayesCMR_2clades(Obs1 = 1*(S1$FosRec>0),
+                            Obs2 = 1*(S2$FosRec>0),dts=S2$dts)
+
+
+f1 <- MCMC_CMR(m2,x0=runif(m2$npar,min=-.1,max=.1),niter=1e6)
+matplot(f1$Chain,type="l")
+matplot(f1$Chain[m2$clade1inx,],type="l")
+matplot(f1$Chain[m2$clade2inx,],type="l")
+
+
+# Have implemented makeCMC2clades into the package, but
+# must be tested and changed so the default plot is something
+# else. Could also include initial pars for sampling inside
+# the makeBayes function (simpler optimization of fixed rate model)
+#
+
+m1 <- make_BayesCMR(1*(S2$FosRec),S2$dts,RE=c(T,T,T))
+f1 <- MCMC_CMR(m1,niter=2e5)
+m1_x <- m1;
+m1_x$probfun <- function(x){m1$likfun(x)$`LogL`}
+f1_x <- MCMC_CMR(m1_x,niter=2e5)
+matplot(f1_x$Chain[,1:2],type="l")
+matplot(f1$Chain[,1:2],type="l")
+
+
+
 TruT <- t(sapply(1:dim(S2$Taxa)[1],
                  function(ii){S2$Taxa[ii,1]<c(cumsum(S2$dts)) & S2$Taxa[ii,2]>c(0,cumsum(S2$dts[-length(S2$dts)]))*1}))
 plot(colSums(TruT),type="o",ylim=c(0,max(colSums(TruT)*1.3)))
@@ -47,101 +108,60 @@ lines(colSums(S2$FosRec>0),type="o",col='red')
 # Change the growth from (1+l-m)^d to exp(-(l-m)*d)
 # S2 <- sim_BD_dts(0.2,0.1,.2,dts = rep(c(.5,1,3,1),6))
 m1 <-    make_BayesCMR(S2$FosRec>0,dts=S2$dts)
-m3 <-  make_BayesCMRv3(S2$FosRec>0,dts=S2$dts)
-m4 <- make_BayesCMR_v4(S2$FosRec>0,dts=S2$dts)
-m5 <- make_BayesCMR_v5(S2$FosRec>0,dts=S2$dts)
-f1 <- MCMC_CMR(m1,niter=3e4)
-f3 <- MCMC_CMR(m3,niter=3e4)
-f4 <- MCMC_CMR(m4,niter=3e4)
-f5 <- MCMC_CMR(m4,niter=3e4)
+m2 <-  make_BayesCMRv2(S2$FosRec>0,dts=S2$dts)
+f1 <- MCMC_CMR(m1,niter=1e4)
+f2 <- MCMC_CMR(m2,niter=1e4)
 # On average f4 seems worse, but the target here is moving
-par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 plot(f1)
-plot(f3)
-plot(f4)
-plot(f5)
+plot(f2)
 
-par(mfrow=c(2,2))
 matplot(exp(f1$Chain[,1:3]),type="l")
-matplot(exp(f3$Chain[,1:3]),type="l")
-matplot(exp(f4$Chain[,1:3]),type="l")
-matplot(exp(f5$Chain[,1:3]),type="l")
+matplot(exp(f2$Chain[,1:3]),type="l")
 c(mean(S2$Spec(seq(0,sum(S2$dts),by=0.01),0)),
   mean(S2$Ext(seq(0,sum(S2$dts),by=0.01),0)),
   mean(S2$Samp(seq(0,sum(S2$dts),by=0.01))))
 
 
-  par(mfrow=c(1,1))
-  colMeans(exp(f1$Chain[-c(1:dim(f1$Chain)[1]/2),]))
-  colMeans(exp(f3$Chain[-c(1:dim(f1$Chain)[1]/2),]))
-  colMeans(exp(f4$Chain[-c(1:dim(f1$Chain)[1]/2),]))
-  colMeans(exp(f5$Chain[-c(1:dim(f1$Chain)[1]/2),]))
-
-# HEre v4 and 5 are obviously better. But all underestimate the sampling.
-# What is a reasonable timeslice variability? From 2-12?
-# S2 <- sim_BD_func_v2(spec=function(t,n){0.3 + 0.1*t},#((t %% 2)>1)*0.25},
-#                   ext = function(t,n){0.2 + 0.1*t},
-#                   dt_ints= rep(c(.3,3),10),
-#                   samp = function(t){1-0.015*t})
-# FOr non-varying interval durs, 1&3 seems to do a bit better, but all
-  # runif(15,min=.5,max=5))
-# v3 seems best, much less 'variability'.
-
-S2 <- sim_BD_func_v2(spec=function(t,n){0.5+0.8*(t>22)},#max(1e-8,0.8-0.1*log(n))},
-                     ext = function(t,n){.45+0.95*(t>22)},#0.4-.3*(t>12)},
-                     samp = function(t,n){0.4},
-                     dt_ints=rep(c(.5,2,3,1),5),n_init=200)
+colMeans(exp(f1$Chain[-c(1:dim(f1$Chain)[1]/2),]))
+colMeans(exp(f2$Chain[-c(1:dim(f1$Chain)[1]/2),]))
 
 
-m1 <-    make_BayesCMR(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T))
-m3 <-  make_BayesCMRv3(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T))
-m4 <- make_BayesCMR_v4(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T))
-m5 <- make_BayesCMR_v5(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T))
+
+m1 <-    make_BayesCMR(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T),DivDep=c(T,T))
+m2 <-  make_BayesCMRv2(S2$FosRec>0,dts=S2$dts,RE=c(T,T,T),DivDep=c(T,T))
 # It's interesting that when rates alternate clearly in sync with the intervals
 # it is not detected?
 x1 <-(optim(c(-1.1,-1,-1),fn=function(x){m1$likfun(c(x[1:3],rep(0,m3$npar-3)))$`LogL`},control=list(fnscale=-1))$par)
-x3 <-(optim(c(-1.1,-1,-1),fn=function(x){m3$likfun(c(x[1:3],rep(0,m3$npar-3)))$`LogL`},control=list(fnscale=-1))$par)
-x4 <-(optim(c(-1.1,-1,-1),fn=function(x){m4$likfun(c(x[1:3],rep(0,m3$npar-3)))$`LogL`},control=list(fnscale=-1))$par)
-x5 <-(optim(c(-1.1,-1,-1),fn=function(x){m5$likfun(c(x[1:3],rep(0,m3$npar-3)))$`LogL`},control=list(fnscale=-1))$par)
+x2 <-(optim(c(-1.1,-1,-1),fn=function(x){m2$likfun(c(x[1:3],rep(0,m2$npar-3)))$`LogL`},control=list(fnscale=-1))$par)
 
-f1a <- MCMC_CMR(m1,niter=5e5,draweps=1e4,x0=c(x1,rep(0,m1$npar-3)))
-f3a <- MCMC_CMR(m3,niter=5e5,draweps=1e4,x0=c(x3,rep(0,m1$npar-3)))
-f4a <- MCMC_CMR(m4,niter=5e5,draweps=1e4,x0=c(x4,rep(0,m1$npar-3)))
-f5a <- MCMC_CMR(m5,niter=5e5,draweps=1e4,x0=c(x5,rep(0,m1$npar-3)))
+f1a <- MCMC_CMR(m1,niter=1e6,draweps=1e3,x0=c(x1,rep(0,m1$npar-3)))
+f2a <- MCMC_CMR(m2,niter=1e6,draweps=1e3,x0=c(x3,rep(0,m2$npar-3)))
+
+  f1a <- contMCMC_CMR(f1a)
+f2a <- contMCMC_CMR(f2a)
 
 # IS it a problem if it's ill-defined if rates are exactly equal?
 # well, perhaps not. It seems that 3 and 4 are closest in 'means'
-f1a <- MCMC_CMR(m1,niter=5e5,cvstp = f1a$Covs,draweps=5e5/100,x0=c(x1,rep(0,m1$npar-3)))
-f3a <- MCMC_CMR(m3,niter=5e5,cvstp = f3a$Covs,draweps=5e5/100,x0=c(x3,rep(0,m1$npar-3)))
-f4a <- MCMC_CMR(m4,niter=5e5,cvstp = f4a$Covs,draweps=5e5/100,x0=c(x4,rep(0,m1$npar-3)))
-f5a <- MCMC_CMR(m5,niter=5e5,cvstp = f5a$Covs,draweps=5e5/100,x0=c(x5,rep(0,m1$npar-3)))
-
 tmp1 <- getRates(f1a)
-tmp3 <- getRates(f3a)
-tmp4 <- getRates(f4a)
-tmp5 <- getRates(f5a)
+tmp2 <- getRates(f2a)
 c(mean(S2$Spec(seq(0,sum(S2$dts),by=0.01),0)),
   mean(S2$Ext(seq(0,sum(S2$dts),by=0.01),0)),
   mean(S2$Samp(seq(0,sum(S2$dts),by=0.01))))
 
 par(mfrow=c(1,3))
 plot(cumsum(S2$dts)[-length(S2$dts)],apply(tmp1$SpecRates,1,median),ylab='Speciation',type="o",ylim=c(0,2))
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp3$SpecRates,1,median),type="o",col='red')
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp4$SpecRates,1,median),type="o",col='green')
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp5$SpecRates,1,median),type="o",col='yellow')
+lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp2$SpecRates,1,median),type="o",col='red')
+# lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp4$SpecRates,1,median),type="o",col='green')
+# lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp5$SpecRates,1,median),type="o",col='yellow')
 lines(seq(0,sum(S2$dts),by=0.2),S2$Spec(seq(0,sum(S2$dts),by=0.2),0),type="l",col='blue')
 
 plot(cumsum(S2$dts),apply(tmp1$SampRates,1,median),type="o",ylab='Samp',ylim=c(0.2,.7))
-lines(cumsum(S2$dts),apply(tmp3$SampRates,1,median),type="o",col='red')
-lines(cumsum(S2$dts),apply(tmp4$SampRates,1,median),type="o",col='green')
-lines(cumsum(S2$dts),apply(tmp5$SampRates,1,median),type="o",col='yellow')
-# lines(seq(0,sum(S2$dts),by=0.1),S2$Samp(seq(0,sum(S2$dts),by=0.1)),type="l",col='blue')
+lines(cumsum(S2$dts),apply(tmp2$SampRates,1,median),type="o",col='red')
 abline(h=S2$Samp(1),col='blue')
 
 plot(cumsum(S2$dts)[-length(S2$dts)],apply(tmp1$ExtRates,1,median),type="o",ylab='Ext',ylim=c(0,2))
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp3$ExtRates,1,median),type="o",col='red')
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp4$ExtRates,1,median),type="o",col='green')
-lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp5$ExtRates,1,median),type="o",col='yellow')
+lines(cumsum(S2$dts)[-length(S2$dts)],apply(tmp2$ExtRates,1,median),type="o",col='red')
 lines(seq(0,sum(S2$dts)),S2$Ext(seq(0,sum(S2$dts)),0),type="l",col='blue')
 
 
@@ -217,3 +237,8 @@ sum(tmp2$`Ll numerator`)
   / sum(abs(tmp2$`Ll numerator`))
 
 
+
+# Could we input a fit to the simulation script and simulate
+# a bds process as estimated?
+
+sum(f1a$Model$Obs[,1]) # number observed first bin, assume

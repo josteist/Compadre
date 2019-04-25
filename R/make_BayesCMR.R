@@ -1,5 +1,5 @@
 
-#' Function to construct CMR-model.
+#' Function to construct one clade CMR-model.
 #'
 #' This function generates a structure containing the necessary functions for a CMR analysis of a fossil dataset.
 #'
@@ -46,6 +46,9 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   }
   if (!is.null(SpecTS)){
     # if drivers for speciation rates are given, check the dimensionality
+    if (NCOL(SpecTS) == 1){
+      SpecTS = t(SpecTS);
+    }
     if (NCOL(SpecTS)!=(dim(Obs)[2]-1)){
       stop("Size of speciation rate drivers does not match dimension of Obs. SpecTS should be of NCOL==(dim(Obs)[2]-1)")
     }
@@ -53,12 +56,18 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
 
   if (!is.null(ExtTS)){
     # if drivers for speciation rates are given, check the dimensionality
+    if (NCOL(ExtTS) == 1){
+      ExtTS = t(ExtTS);
+    }
     if (NCOL(ExtTS)!=(dim(Obs)[2]-1)){
       stop("Size of extinction rate drivers does not match dimension of Obs. ExtTS should be of NCOL==(dim(Obs)[2]-1)")
     }
   }
 
   if (!is.null(SmpTS)){
+    if (NCOL(SmpTS) == 1){
+      SmpTS = t(SmpTS);
+    }
     # if drivers for speciation rates are given, check the dimensionality
     if (NCOL(SmpTS)!=(dim(Obs)[2])){
       stop("Size of sampling rate drivers does not match dimension of Obs. ExtTS should be of NCOL==(dim(Obs)[2])")

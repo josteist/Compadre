@@ -11,5 +11,5 @@ License: Do what you want, but please acknowledge my work.
 Encoding: UTF-8
 LazyData: true
 Imports:
-	mvtnorm
+	mvtnorm, coda
 RoxygenNote: 6.1.1

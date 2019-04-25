@@ -6,16 +6,16 @@
 #' @param niter is number of iterations. Defaults to 1e3.
 #' @param nthin sets the thinning, i.e. samples for each nthin iterations are stored as output. Defaults to 10.
 #' @param vmin sets the minimum and initial standard deviation of the normal proposals.
-#' @param draweps rename?
+#' @param draweps number of iterations between each update of the proposal covariance matrix. Defaults to niter/100
 #' @param x_init Potential initial values for the chain. Defaults to c(-4,-4,-4,rep(0,cmrModel$npar-3)).
 #' @param cvstp Covariance structure for proposal. This is tuned during burnin. Defaults to (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar))
 #' @param adapt Adapt the covariance proposals during first half?
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
 MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
-                       draweps=niter/10,
-                       x0=c(-4,-4,-4,rep(0,cmrModel$npar-3)),
-                       cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
+                     draweps=niter/100,
+                     x0=NULL,
+                     cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
                      adapt=TRUE){
   # Adaptive MCMC approach, tuning the stps to the covariance of the
   # chain for the first half of the run.
@@ -23,6 +23,27 @@ MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
   # first half og the total niter [number of iterations.]
   # _v2 should store all samples for each block(draweps), and use the samples from the last block
   # only to update the cov. Then we need a temp_X which stores ALL samples for each block.
+  if (is.null(cmrModel$clade1inx)){
+    # If this is null, then the model is for one clade only.
+    if (is.null(x0)){
+      # If no initial given, then optimize for main three parameters and use those as inits + only 0's
+      # c(-2,-2.2,-2.1,rep(0,cmrModel$npar-3))
+      x0 = c(optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$npar-3)))})$par,
+             rep(0,cmrModel$npar-3))
+    }
+  } else {
+    # This is a two clade model.
+    if (is.null(x0)){
+      # If no initial given, then optimize for main three parameters and use those as inits + only 0's
+      # c(-2,-2.2,-2.1,rep(0,cmrModel$npar-3))
+      xtmp1<-optim(c(-1.1,-1.2,-1),function(x){-cmrModel$Clade1Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade1Mod$npar-3)))})$par
+      xtmp2<-optim(c(-1.1,-1.2,-1),function(x){-cmrModel$Clade2Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade2Mod$npar-3)))})$par
+
+      x0 = c(xtmp1,rep(0,cmrModel$Clade1Mod$npar-3),
+             xtmp2,rep(0,cmrModel$Clade2Mod$npar-3),
+             rep(0,cmrModel$npar-cmrModel$Clade1Mod$npar - cmrModel$Clade2Mod$npar))
+    }
+  }
   fullcall <- deparse(match.call());
   # print(fullcall)
   print(paste0('MCMC run started at ', Sys.time()))
@@ -61,7 +82,7 @@ MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
       # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(X_Big[round(tix/2):(tix-1),])  +
       # diag(vmin,cmrModel$npar))
       cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
-                                               diag(vmin,cmrModel$npar))
+                                                 diag(vmin,cmrModel$npar))
 
       # print(cvstp[1:4,1:4])
       if (jj>(noblc/2)){
@@ -95,5 +116,5 @@ MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
   print(paste0('MCMC run finished at ', Sys.time()))
   out <- list(Call = fullcall,Chain=X_Big,Probs=P_Big,Accept=A_Big,Model=cmrModel,Covs = cvstp,date=date())
   attr(out,"class") <- "CMR_fit";
-    return(out)
+  return(out)
 }

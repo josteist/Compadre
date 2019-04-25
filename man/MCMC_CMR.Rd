@@ -5,7 +5,7 @@
 \title{An adaptive Markov chain Monte Carlo sampler for estimating parameters of a CMR_model.}
 \usage{
 MCMC_CMR(cmrModel, niter = 1000, nthin = 10, vmin = 1e-05,
-  draweps = niter/10, x0 = c(-4, -4, -4, rep(0, cmrModel$npar - 3)),
+  draweps = niter/100, x0 = NULL,
   cvstp = (2.38/(sqrt(cmrModel$npar)))^2 * diag(vmin, cmrModel$npar),
   adapt = TRUE)
 }
@@ -18,7 +18,7 @@ MCMC_CMR(cmrModel, niter = 1000, nthin = 10, vmin = 1e-05,
 
 \item{vmin}{sets the minimum and initial standard deviation of the normal proposals.}
 
-\item{draweps}{rename?}
+\item{draweps}{number of iterations between each update of the proposal covariance matrix. Defaults to niter/100}
 
 \item{cvstp}{Covariance structure for proposal. This is tuned during burnin. Defaults to (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar))}
 
