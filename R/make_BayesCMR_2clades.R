@@ -23,12 +23,12 @@
 #'
 make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,intExt=T,
                                   SpecTS1=NULL,ExtTS1=NULL,SmpTS1=NULL,
-                                  SpecTS2=NULL,ExtTS2=NULL,SmpTS2=NULL){
+                                  SpecTS2=NULL,ExtTS2=NULL,SmpTS2=NULL,...){
   # THis function generates a model with two interacting clades.
   # NO external drivers are included for now, but intSpec and inExt =F/T
   # denotes if interactions are between and within clades on speciation or extinction rates
-  m1 <- make_BayesCMR(  Obs1, dts = dts,RE=c(T,T,T),SpecTS = SpecTS1,ExtTS= ExtTS1,SmpTS = SmpTS1)
-  m2 <- make_BayesCMR(  Obs2, dts = dts,RE=c(T,T,T),SpecTS = SpecTS2,ExtTS= ExtTS2,SmpTS = SmpTS2)
+  m1 <- make_BayesCMR(  Obs1, dts = dts,RE=c(T,T,T),SpecTS = SpecTS1,ExtTS= ExtTS1,SmpTS = SmpTS1,...)
+  m2 <- make_BayesCMR(  Obs2, dts = dts,RE=c(T,T,T),SpecTS = SpecTS2,ExtTS= ExtTS2,SmpTS = SmpTS2,...)
 
   # This is the probfun.
   # ltmpfun are m1$rat

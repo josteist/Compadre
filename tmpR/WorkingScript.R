@@ -69,11 +69,11 @@ lines(seq(0,sum(S2$dts),by=0.5),S2$Ext(seq(0,sum(S2$dts),by=0.5),0),lty=3,col='r
 S1 <- sim_BD_func_v2(spec=function(t,n){.53+sin(t)*0.3},#max(1e-8,0.8-0.1*log(n))},
                      ext = function(t,n){.4+sin(t-pi/2)*0.07},#0.4-.3*(t>12)},
                      samp = function(t,n){3.3},n_init=100,
-                     dt_ints=rep(0.5,5))#rep(c(.5,4),6))
+                     dt_ints=rep(0.5,3))#rep(c(.5,4),6))
 m1 <- make_BayesCMR(S1$FosRec>0,dts=S1$dts)
 
 m2 <- make_BayesCMR_2clades(Obs1 = 1*(S1$FosRec>0),
-                            Obs2 = 1*(S2$FosRec>0),dts=S2$dts)
+                            Obs2 = 1*(S2$FosRec>0),dts=S2$dts,pfix=1)
 
 
 f1 <- MCMC_CMR(m2,x0=runif(m2$npar,min=-.1,max=.1),niter=1e6)

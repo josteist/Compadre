@@ -6,7 +6,7 @@
 \usage{
 make_BayesCMR_2clades(Obs1, Obs2, dts = rep(1, dim(Obs1)[2]),
   intSpec = T, intExt = T, SpecTS1 = NULL, ExtTS1 = NULL,
-  SmpTS1 = NULL, SpecTS2 = NULL, ExtTS2 = NULL, SmpTS2 = NULL)
+  SmpTS1 = NULL, SpecTS2 = NULL, ExtTS2 = NULL, SmpTS2 = NULL, ...)
 }
 \arguments{
 \item{Obs1}{observations clade 1: a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
