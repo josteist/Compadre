@@ -97,8 +97,8 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,in
     mpl1 <- sum(dnorm(x_b[xix1[1:3]],0,10),log=T) + # prior for µs
       sum(dnorm(x_b[xix2[1:3]],0,10,log=T)) + # prior for µs
       sum(dnorm(x_b[xinx],0,10,log=T)) +
-      sum(dunif(x_b[xix1[4:6]],min=-3,max=1),log=T) +
-      sum(dunif(x_b[xix2[4:6]],min=-3,max=1),log=T)
+      sum(dunif(x_b[xix1[4:6]],min=-3,max=1,log=T))+
+      sum(dunif(x_b[xix2[4:6]],min=-3,max=1,log=T))
 
     p_tot = ll1$LogL + ll2$LogL + sum(hpl1) + sum(hpl2) + sum(mpl1)
     return(p_tot)
