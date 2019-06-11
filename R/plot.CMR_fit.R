@@ -29,6 +29,7 @@ plot.CMR_fit <- function(fit,...){
                      rgb(0.1,0.8,0.1,0.6)))
 
       } else {
-  plotRates(fit,...)
-  }
+  tmp <- plotRates(fit,...)
+      }
+  return(tmp)
 }

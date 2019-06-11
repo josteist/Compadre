@@ -1,7 +1,7 @@
 # Testing two interacting clades.
 library(Compadre)
 stages = GSA_timescale[GSA_timescale$scale_level==5,]
-do = seq(52,22,by=-1)
+do = seq(90,8,by=-1)
 # 90 to 8 is 'Phanerozoic'
 stages[do,]$interval_name
 drivers <- Proxies[do[-length(do)],1:2] # not driver for last bin
@@ -10,7 +10,24 @@ Obs = (1*(InvertPBDB>0))[,do]
 Obs <- Obs[which(rowSums(Obs)>0),]
 dim(Obs)
 plot(cumsum(dts),colSums(Obs>0),type="o")
+set.seed(190480)
 mx1 <- make_BayesCMR(Obs,dts,RE=c(T,T,T),DivDep = c(F,F))
+x0  <- getInit(mx1)
+fx1 <- MCMC_CMR(mx1,niter = 1e6)
+fx1b <- MCMC_CMR(mx1,niter = 5e5,draweps=1e3,vmin=1e-1,x0=x0)
+
+matplot(fx1$Chain[1:1e4,1:3],type="l")
+matplot(fx1b$Chain[,1:3],type="l")
+
+
+
+x <- fx1b$Chain[1,]
+x2 <-   sapply(7:mx1$npar,
+         function(jj){optim(c(-1),function(y){-mx1$probfun(c(x[1:jj],y,x[(jj+1):mx1$npar]))},method='Brent',lower=-10,upper=10)$par})
+
+plot(fx1)
+ESS(fx1)
+
 mx2 <- make_BayesCMR(Obs,dts,RE=c(T,T,T),DivDep = c(T,F))
 mx3 <- make_BayesCMR(Obs,dts,RE=c(T,T,T),DivDep = c(F,T))
 mx4 <- make_BayesCMR(Obs,dts,RE=c(T,T,T),DivDep = c(T,T))

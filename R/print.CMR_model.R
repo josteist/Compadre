@@ -1,10 +1,10 @@
 #' @export
 print.CMR_model <- function(mod){
   if (is.null(mod$clade1inx)){
-    cat('A Capture-Mark-Recapture model using ',dim(mod$Obs)[1],' taxa,')
+    cat('Model includes ',dim(mod$Obs)[1],' taxa,')
     cat(' spanning ',dim(mod$Obs)[2],' intervals. \n')
-    cat('The model was generated',mod$date,'\n')
-    cat('and has', mod$npar,'parameters.\n')
+    cat('The model was generated',mod$date)
+    cat(' and has', mod$npar,'parameters.\n')
     cat('\n')
 
     # If only 1 clade model
