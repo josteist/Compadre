@@ -12,11 +12,13 @@
 #' @param adapt Adapt the covariance proposals during first half?
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
-MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
-                     draweps=niter/100,
-                     x0=NULL,
-                     cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
-                     adapt=TRUE){
+#'
+MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-3,
+                         draweps=niter/100,
+                         x0=NULL,
+                         cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
+                         adapt=TRUE){
+  # Perhaps this works better if we ignore the 'covariance' part in the early phase (since most is prob directional anyways) and introduce it
   # Adaptive MCMC approach, tuning the stps to the covariance of the
   # chain for the first half of the run.
   # The covariance proposal is updated each draweps iteration the
@@ -68,6 +70,7 @@ MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
   tix = 1; # counter for the stored samples, i.e. for each nthin sample
   # adapt = T; # TRUE/FALSE if the var/covar should be updated.
   tmpA = 0;  # Temporary array to cound acceptances.
+  # PErhasp rather than a vmin ,have a v_init = 100*vmin? OR the other way around, just initiaize with vmin*100`?`
   for (jj in 1:noblc){
 
     if (jj>1 & adapt==T){
@@ -81,8 +84,11 @@ MCMC_CMR <- function(cmrModel,niter=1e3,nthin=10,vmin=1e-5,
       # old:
       # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(X_Big[round(tix/2):(tix-1),])  +
       # diag(vmin,cmrModel$npar))
+      # BELOW WAS COMMENTED OUT 110619 for testing setting the stepsize for main pars to /10 of others
       cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
-                                                 diag(vmin,cmrModel$npar))
+                                                 diag(vmin/100,cmrModel$npar))
+
+
 
       # print(cvstp[1:4,1:4])
       if (jj>(noblc/2)){

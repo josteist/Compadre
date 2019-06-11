@@ -10,7 +10,7 @@
 #' @param Obs1 observations clade 1: a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.
 #' @param Obs2 observations clade 1: a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.
 #' @param dts a vector of interval durations. Defaults to series of 1's if not given.
-#' @param intSpec TRUE/FALSE on whether or not diversities of both clades affect speciation rates of both.
+#' @param intSpec matrix of interactions between clades on speciation rates. Given as unique integers, starting at 1. For only diversity dependence of speciation rates within clades = matrix(c(1,NA,NA,2),nrow=2). For only between clade interactions = matrix(c(NA,1,2,NA),nrow=2). Similarly for intExt, starting at the ma(intSpec)+1
 #' @param SpecTS1/2 drivers for speciation rates for clades 1/2
 #' @param ExtTS1/2 drivers for extinction rates for clades 1/2
 #' @param SmpTS1/2 drivers for sampling rates
@@ -21,11 +21,17 @@
 #'
 #'
 #'
-make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,intExt=T,
+make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=matrix(rep(NA,4),nrow=2),intExt=matrix(rep(NA,4),nrow=2),
                                   SpecTS1=NULL,ExtTS1=NULL,SmpTS1=NULL,
                                   SpecTS2=NULL,ExtTS2=NULL,SmpTS2=NULL,...){
   # THis function generates a model with two interacting clades.
-  # NO external drivers are included for now, but intSpec and inExt =F/T
+  # Drivers can also be fed into clades separately (SpecTS1 v SpecTS2 etc).
+  # intSpec and intExt are matrices which define the interactions between clades. If NA, then no interaction. I
+  # If speciation rates of clade 1 is impacte by its own and the other clades diversity (with different effects), then
+  # the first row should be [1,2], with numbers indicating unique interactions. If clade1 is equally impacted in its speciation rate
+  # from the richness of both own and clade 2, then same numbers can be given
+  # intSpec = [1 , NA]
+  #           [NA, 1]
   # denotes if interactions are between and within clades on speciation or extinction rates
   m1 <- make_BayesCMR(  Obs1, dts = dts,RE=c(T,T,T),SpecTS = SpecTS1,ExtTS= ExtTS1,SmpTS = SmpTS1,...)
   m2 <- make_BayesCMR(  Obs2, dts = dts,RE=c(T,T,T),SpecTS = SpecTS2,ExtTS= ExtTS2,SmpTS = SmpTS2,...)
@@ -36,6 +42,8 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,in
   # TO DO (short term)
   # - make it allow for drivers.
   # - expand diversity effect switches to be matrices for Spec and Ext
+  # How to best to that
+
   # - output some simple
 
 
@@ -48,16 +56,30 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,in
 
   xix1 <- seq(1,length.out=m1$npar,by=1)
   xix2 <- seq(1+m1$npar,length.out=m2$npar,by=1)
-  xinx <- seq(1+m1$npar+m2$npar,length.out=(4*intSpec+4*intExt),by=1)
+  xinx <- seq((m1$npar+m2$npar) +1,length.out=length(unique(intSpec[1:4]))-(sum(is.na(intSpec[1:4]))>0) +
+    length(unique(intExt[1:4]))-(sum(is.na(intExt[1:4]))>0),by=1)
+  # So this is an array of interaction-effects as indexes into bigX. So
+  # xinx <- seq(1+m1$npar+m2$npar,length.out=(4*intSpec+4*intExt),by=1)
 
-
+ # Now let the intSpec and intExt be MATRICES WITH NUMBERED INDEXES. Let non-interactions be 0
+  # I.e. for symmetric interactions (summed richness)
   myp_test <- function(x_b){
     # Or length 8 if diversity dependence in both rates internal and external
     # DIV DEP NOT IN MODEL YET:
-    lfec1 <- m1$ratefunc[[1]](x_b[xix1]) + m1$n_norm(x_b[xix1])*x_b[xinx[1]] +  m2$n_norm(x_b[xix2])*x_b[xinx[2]]
-    lfec2 <- m2$ratefunc[[1]](x_b[xix2]) + m1$n_norm(x_b[xix1])*x_b[xinx[3]] +  m2$n_norm(x_b[xix2])*x_b[xinx[4]]
-    lext1 <- m1$ratefunc[[2]](x_b[xix1]) + m1$n_norm(x_b[xix1])*x_b[xinx[5]] +  m2$n_norm(x_b[xix2])*x_b[xinx[6]]
-    lext2 <- m2$ratefunc[[2]](x_b[xix2]) + m1$n_norm(x_b[xix1])*x_b[xinx[7]] +  m2$n_norm(x_b[xix2])*x_b[xinx[8]]
+    lfec1 <- m1$ratefunc[[1]](x_b[xix1]) + ifelse(is.na(intSpec[1,1]),0,m1$n_norm(x_b[xix1])*x_b[xinx[intSpec[1,1]]])
+                                         + ifelse(is.na(intSpec[1,2]),0,m2$n_norm(x_b[xix2])*x_b[xinx[intSpec[1,2]]])
+    # lfec1 = base-rate from model 1 + intSpec[1,1]*div1  + intSpec[1,2]*div2
+
+    lfec2 <- m2$ratefunc[[1]](x_b[xix2]) + ifelse(is.na(intSpec[2,1]),0,m1$n_norm(x_b[xix1])*x_b[xinx[intSpec[2,1]]])
+                                         + ifelse(is.na(intSpec[2,2]),0,m2$n_norm(x_b[xix2])*x_b[xinx[intSpec[2,2]]])
+
+
+    lext1 <- m1$ratefunc[[2]](x_b[xix1]) + ifelse(is.na(intExt[1,1]),0,m1$n_norm(x_b[xix1])*x_b[xinx[intExt[1,1]]])
+                                         + ifelse(is.na(intExt[1,2]),0,m2$n_norm(x_b[xix2])*x_b[xinx[intExt[1,2]]])
+
+
+    lext2 <- m2$ratefunc[[2]](x_b[xix2]) + ifelse(is.na(intExt[2,1]),0,m1$n_norm(x_b[xix1])*x_b[xinx[intExt[2,1]]])
+                                         + ifelse(is.na(intExt[2,2]),0,m2$n_norm(x_b[xix2])*x_b[xinx[intExt[2,2]]])
     lsmp1 <- m1$ratefunc[[3]](x_b[xix1])
     lsmp2 <- m2$ratefunc[[3]](x_b[xix2])
 
@@ -103,8 +125,8 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),intSpec=T,in
     p_tot = ll1$LogL + ll2$LogL + sum(hpl1) + sum(hpl2) + sum(mpl1)
     return(p_tot)
   }
-  out <- list(Clade1Mod=m1,Clade2Mod=m2,probfun=myp_test,npar = m1$npar+m2$npar+8,
-              clade1inx = xix1, clade2inx=xix2,intinx=xinx)
+  out <- list(Clade1Mod=m1,Clade2Mod=m2,probfun=myp_test,npar = m1$npar+m2$npar+length(xinx),
+              clade1inx = xix1, clade2inx=xix2,intinx=xinx,intSpec = intSpec,intExt = intExt)
   attr(out,"class")<-"CMR_model"
   return(out)
 }

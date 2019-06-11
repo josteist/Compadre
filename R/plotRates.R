@@ -22,9 +22,9 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   par(mfrow=c(3,1),mar=c(2,4,.2,1))
 
   # extracting spc rate quantile
-  tmp <- apply(exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$ratefunc[[1]](fit_1$Chain[tpl[ii],])+
-      fit_1$Model$ratefunc[[4]](fit_1$Chain[tpl[ii],])}))),1,
+  spec_smps <- exp((sapply(1:length(tpl),function(ii){
+    fit_1$Model$specfun(fit_1$Chain[tpl[ii],])})))
+  tmp <- apply(spec_smps,1,
     mf<-function(k){quantile(k,qs)})
 
   # plot(rev((stgs$max_ma))[-1],tmp[2,],type="o",lty=0,col='black',pch=19,
@@ -39,9 +39,9 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
 
   # extinction quantile
-  tmp <- apply(exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$ratefunc[[2]](fit_1$Chain[tpl[ii],])+
-      fit_1$Model$ratefunc[[5]](fit_1$Chain[tpl[ii],])}))),1,
+  ext_smps <- exp((sapply(1:length(tpl),function(ii){
+    fit_1$Model$extfun(fit_1$Chain[tpl[ii],])})))
+  tmp <- apply(ext_smps,1,
     mf<-function(k){quantile(k,qs)})
   plot(bnds[-c(1,length(bnds))],tmp[2,],type="o",lty=0,col='black',pch=19,
        xlim = c(max(bnds)+3,min(bnds-3)),
@@ -55,8 +55,9 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
 
   # sampling quantiles
-  tmp <- apply(exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$ratefunc[[3]](fit_1$Chain[tpl[ii],])}))),1,
+  smp_smps <- exp((sapply(1:length(tpl),function(ii){
+    fit_1$Model$ratefun[[3]](fit_1$Chain[tpl[ii],])})))
+  tmp <- apply(smp_smps,1,
     mf<-function(k){quantile(k,qs)})
   plot((bnds[-1]+bnds[-length(bnds)])/2,tmp[2,],type="o",lty=0,col='black',pch=19,
        xlim = c(max(bnds)+3,min(bnds-3)),xaxt='n',
@@ -91,6 +92,6 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   # }
   # abline(v=union(stgs$min_ma,stgs$max_ma),col=rgb(0.1,0.1,0.1,0.1))
   #
-
-  return(bnds)
+ out <- list(SpecRates= spec_smps,ExtRates = ext_smps,SampRates = smp_smps)
+  return(out)
 }

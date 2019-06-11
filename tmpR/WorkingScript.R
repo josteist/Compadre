@@ -24,8 +24,8 @@ setwd("\Documents")
 # install.packages("Compadre")
 
 setwd("C:/Users/josteist/Documents/Compadre")
-
 document()
+
 setwd("C:/Users/josteist/Documents/")
 install('Compadre')
 
@@ -33,15 +33,97 @@ install('Compadre')
 library(Compadre)
 # Made a couple of changes, commit them now, push later
 stages = GSA_timescale[GSA_timescale$scale_level==5,]
-do = seq(90,8,by=-1)
+do = seq(90,8,by=-1) #90:8
 stages[do,]$interval_name
 dts = rev(stages$max_ma-stages$min_ma)[do]
 Obs = (1*(InvertPBDB>0))[,do]
 Obs <- Obs[which(rowSums(Obs)>0),]
+Drivers = t(Proxies[do[-length(do)],]) # No rates out of last bin, therefore remove
 
 m1 <- make_BayesCMR(Obs,dts=dts,RE=c(T,T,T))
-m2 <- make_BayesCMR(Obs,dts=dts)
-ft <- MCMC_CMR(m2,niter=1e5,nthin=200)
+m2 <- make_BayesCMR(Obs,dts=dts,RE=c(T,T,T),DivDep = c(T,F))
+m3 <- make_BayesCMR(Obs,dts=dts,RE=c(F,F,F),DivDep = c(F,F),SpecTS = Drivers)
+
+m4a <- make_BayesCMR_tmp(Obs,dts=dts,RE=c(F,F,F),DivDep = c(T,T),
+                    SpecTS = Drivers,ExtTS=Drivers)
+m4c <- make_BayesCMR(Obs,dts=dts,RE=c(F,F,F),DivDep = c(T,T),
+                         SpecTS = Drivers,ExtTS=Drivers)
+x <- c(-2,-2,-2,runif(m4a$npar-3))
+m4a$probfun(x)
+m4b$probfun(c(x,0,0))
+m4c$probfun(x)
+
+plot(m4a$likfun(x)$phi)
+points(m4b$likfun(c(x[1:13],0,3))$phi,pch=3,col='red')
+points(m4b$likfun(c(x[1:13],0,0))$phi,pch=3,col='red')
+
+points(m4c$likfun(x)$phi,pch=3,col='yellow')
+
+m4b <- make_BayesCMR_tmp(Obs,dts=dts,RE=c(F,F,F),DivDep = c(T,T),
+                        SpecTS = Drivers,ExtTS=Drivers,
+                        SpecInt = c(T,F,T,F))
+
+ft4a <- MCMC_CMR(m4a,niter=1e6,nthin=100,draweps=500,vmin=1e-2)
+ft4b <- MCMC_CMR(m4b,niter=1e6,nthin=100,draweps=500,vmin=1e-2)
+
+
+optim(c(-2,-2,-2,runif(min=-.1,max=.1,m4b$npar-3)),fn=function(x){-m4b$probfun(x)})
+
+
+m5 <- make_BayesCMR_tmp(Obs,dts=dts,RE=c(T,T,F),DivDep = c(T,T),
+                        SpecTS = Drivers,ExtTS=Drivers,
+                        SpecInt = c(T,F,F,F),
+                        ExtInt  = c(F,F,F,T))
+x <- runif(m5$npar)
+x[4:20]=0.1
+m5$ratefunc[[6]](x)
+m5$ratefunc[[7]](x)
+m5$probfun(x)
+
+rowSums(m5$ratefunc[[7]](x))
+rowSums(m5$ratefunc[[6]](x))
+
+
+f1 <- MCMC_CMR(m5,niter=1e5)
+
+
+ft1 <- MCMC_CMR(m1,niter=1e6,nthin=100,draweps=1000)
+ft2 <- MCMC_CMR(m2,niter=1e6,nthin=100,draweps=1000)
+ft3 <- MCMC_CMR(m3,niter=1e5,nthin=10,draweps=500)
+ft4 <- MCMC_CMR(m4,niter=1e5,nthin=10,draweps=500)
+
+
+## Testing model likelihood
+doBayesModelLike <- function(myf,chain,ndraws=1e4){
+  thetas <- apply(chain,2,mean);
+  vcv    <- cov(chain);
+  drws   <- rmvnorm(ndraws,mean=thetas,sigma=vcv);
+  mbd  <- (sapply(1:dim(drws)[1],function(ii){myf(drws[ii,])}))
+  dmv  <- dmvnorm(drws,mean=thetas,sigma=vcv,log=T)
+  mod_hat <- myf(thetas)
+  norm_hat <- dmvnorm(thetas,mean=thetas,sigma=vcv,log=T)
+  logBML <- log(1/ndraws) + (-norm_hat+mod_hat) +
+    log(sum(exp(mbd-mod_hat)/exp(dmv-norm_hat)))
+
+  return(list(model_prob=mbd,normal_prob=dmv,draws=drws,thetas=thetas,vcv=vcv,logBML=logBML))
+}
+
+
+# Could we also optimize to get the 'RE's?
+tmpf <- function(x){m1$probfun(c(x[1],x[2],x[3],rep(0,m1$npar-3)))}
+optim(c(-1.2,-1.1,-1.0),function(x){-m1$probfun(c(x[1],x[2],x[3],rep(0,m1$npar-3)))})
+
+
+bml <- doBayesModelLike(m2$probfun,ft$Chain[501:1000,],ndraws=100)
+
+us <- seq(dim(ft1$Chain)[1]/2,dim(ft1$Chain)[1],by=10)
+bml1 <- sapply(seq(100,5000,by=100),
+       function(ii){doBayesModelLike(m1$probfun,ft1$Chain[us,],ndraws=ii)$logBML})
+bml2 <- sapply(seq(100,5000,by=100),
+       function(ii){doBayesModelLike(m2$probfun,ft2$Chain[us,],ndraws=ii)$logBML})
+matplot(cbind(bml1,bml2),type="o")
+
+# This might actually work now.
 
 myESS(ft)
 
@@ -69,7 +151,13 @@ lines(seq(0,sum(S2$dts),by=0.5),S2$Ext(seq(0,sum(S2$dts),by=0.5),0),lty=3,col='r
 S1 <- sim_BD_func_v2(spec=function(t,n){.53+sin(t)*0.3},#max(1e-8,0.8-0.1*log(n))},
                      ext = function(t,n){.4+sin(t-pi/2)*0.07},#0.4-.3*(t>12)},
                      samp = function(t,n){3.3},n_init=100,
-                     dt_ints=rep(0.5,3))#rep(c(.5,4),6))
+                     dt_ints=rep(0.1,10))#rep(c(.5,4),6))
+S2 <- sim_BD_func_v2(spec=function(t,n){.53+sin(t)*0.3},#max(1e-8,0.8-0.1*log(n))},
+                     ext = function(t,n){.4+sin(t-pi/2)*0.07},#0.4-.3*(t>12)},
+                     samp = function(t,n){3.3},n_init=100,
+                     dt_ints=rep(0.1,10))#rep(c(.5,4),6))
+
+
 m1 <- make_BayesCMR(S1$FosRec>0,dts=S1$dts)
 
 m2 <- make_BayesCMR_2clades(Obs1 = 1*(S1$FosRec>0),
