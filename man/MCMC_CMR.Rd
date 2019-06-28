@@ -10,7 +10,7 @@ MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 0.1,
   adapt = TRUE)
 }
 \arguments{
-\item{cmrModel}{is a model generated with make.BayesCMR}
+\item{cmrModel}{is a model generated with make_BayesCMR}
 
 \item{niter}{is number of iterations. Defaults to 1e3.}
 
@@ -30,5 +30,5 @@ MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 0.1,
 a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 }
 \description{
-After generating a model using \link{make.BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burning phase is used for proposals in the latter half, insert ref here.
+After generating a model using \link{make_BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burning phase is used for proposals in the latter half, insert ref here.
 }

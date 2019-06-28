@@ -10,7 +10,7 @@
   #' @param ExtTS a vector or matrix of drivers for extinction rates. Defaults to NULL. Oldest interval is first column. Each driver of length \emph{n-1}.
   #' @param SmpTS a vector or matrix of drivers for sampling rates. One row for each driver and one column for each interval. Defaults to NULL. Oldest interval is first column. Each driver has \emph{n} entries.
   #' @param DivDep a switch to set inclusion of diversity dependence in speciation and extinction rates, respectively. Defaults to c(FALSE, FALSE)
-  #' @param SpecInt a vector with TRUE/FALSE for which drivers interact with the diversity-dependent term. If TRUE a separate parameter for the impact of Driver*Diversity is estimated.
+  #' @param Driv_x_Div_Spec a vector with TRUE/FALSE for which drivers interact with the diversity-dependent term. If TRUE a separate parameter for the impact of Driver*Diversity is estimated.
   #' @param pfix a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.
   #' @param priorsNorm_Cov sets the parameters for the normal prior for the impact of the drivers. Defaults to Norm(mu=0,sd=2).
   #' @param priorsNorm_Mus sets the parameters for the normal prior for the (log) mean speciation, extinction and sampling rates. Given as a list of three entries with (mu,sd). Defaults to rep(list(c(-4,4)),3), i.e. all normal priors with mu=-4 and sd=3.
@@ -27,7 +27,7 @@
   make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
                             RE=c(FALSE,FALSE,FALSE),
                             SpecTS=NULL,ExtTS=NULL,SmpTS=NULL,
-                            DivDep=c(FALSE,FALSE),SpecInt = NULL, ExtInt=NULL,
+                            DivDep=c(FALSE,FALSE),Driv_x_Div_Spec = NULL, Driv_x_Div_Ext=NULL,
                             pfix=2,priorsNorm_Cov=c(0,2),
                             priorsNorm_Mus = rep(list(c(-4,4)),3),
                             priorsUnif=c(-3,3),replRE_1 = F){
@@ -171,7 +171,7 @@
     ts_orig = list(origSpecTS,origExtTS,origSmpTS)
 
 
-    nhps <- 3+sum(RE*1)+sum(DivDep*1) + nSmpTS+nExtTS+nSpecTS + sum(SpecInt) + sum(ExtInt); # number of mean+hyperparameters
+    nhps <- 3+sum(RE*1)+sum(DivDep*1) + nSmpTS+nExtTS+nSpecTS + sum(Driv_x_Div_Spec) + sum(Driv_x_Div_Ext); # number of mean+hyperparameters
     nTS  <- c(nSpecTS,nExtTS,nSmpTS);
     # ALL x-arrays endd with the RE's, so all indexes below here that are not the first 3+sum(RE) sohuld have sum(DivDep) added to them.
     # All these have priors dnorm(0,5), the Sd[RE] are log(sd) really.
@@ -185,8 +185,8 @@
     alphinx[[3]] <- seq(3+sum(RE*1)+sum(DivDep*1)+1+length(alphinx[[1]])+length(alphinx[[2]]),length.out=nSmpTS)
     alphinx[[4]] <- seq(3+sum(RE*1)+1,length.out=DivDep[1]*1)
     alphinx[[5]] <- seq(3+sum(RE*1)+DivDep[1]*1+1,length.out=DivDep[2]*1)
-    alphinx[[6]] <- seq(3+sum(RE*1)+sum(DivDep)+length(alphinx[[1]])+length(alphinx[[2]])+1,length.out=sum(SpecInt))
-    alphinx[[7]] <- seq(3+sum(RE*1)+sum(DivDep)+sum(SpecInt)+length(alphinx[[1]])+length(alphinx[[2]])+1,length.out=sum(ExtInt))
+    alphinx[[6]] <- seq(3+sum(RE*1)+sum(DivDep)+length(alphinx[[1]])+length(alphinx[[2]])+1,length.out=sum(Driv_x_Div_Spec))
+    alphinx[[7]] <- seq(3+sum(RE*1)+sum(DivDep)+sum(Driv_x_Div_Spec)+length(alphinx[[1]])+length(alphinx[[2]])+1,length.out=sum(Driv_x_Div_Ext))
 
     names(alphinx) <- c('Covar_Speciation','Covar_Extinction','Covar_Sampling',
                         'DivDep_Speciation','DivDep_Extinction','Interaction Spec:driver*diversity','Interaction Ext:driver*diversity')
@@ -252,8 +252,10 @@
       ltmpfun[[1]] <- function(x){rep(x[1],length(dts)-1)}
       ltmpfun[[2]] <- function(x){rep(x[2],length(dts)-1)};
       ltmpfun[[3]] <- function(x){rep(x[3],length(dts))};
-      ltmpfun[[4]] <- function(x){0};
-      ltmpfun[[5]] <- function(x){0}; # for completeness of output only.
+      ltmpfun[[4]] <- function(x){rep(0,length(dts)-1)};
+      ltmpfun[[5]] <- function(x){rep(0,length(dts)-1)}; # for completeness of output only.
+      ltmpfun[[6]] <- function(x){rep(0,length(dts)-1)};
+      ltmpfun[[7]] <- function(x){rep(0,length(dts)-1)}; # for completeness of output only.
       ptmpfun <- list();
       n_est <- function(x){ (n[1:length(dts)-1]/
                                (rate2prob(exp(ltmpfun[[3]](x)),dts)[1:(length(dts)-1)]))}
@@ -265,7 +267,12 @@
       # more complicated model
       ltmpfun <- list(); # list of functions for fec, ext and samp
       ptmpfun <- list(); # list of functions for PRIORs. For random efSpecTS only.
-      # if no prior function is added here, place
+      ltmpfun[[4]] <- function(x){rep(0,length(dts)-1)};
+      ltmpfun[[5]] <- function(x){rep(0,length(dts)-1)}; # for completeness of output only.
+      ltmpfun[[6]] <- function(x){rep(0,length(dts)-1)};
+      ltmpfun[[7]] <- function(x){rep(0,length(dts)-1)}; # for completeness of output only.
+
+            # if no prior function is added here, place
       ptmpfun[[1]] <- function(x){0}
       ptmpfun[[2]] <- function(x){0}
       ptmpfun[[3]] <- function(x){0}
@@ -294,8 +301,8 @@
             if (jj==1){
               # ltmpfun[[jj]] <- eval(substitute(function(x){rep(x[j1],lns[j1])},list(j1=jj)))
               #
-              ltmpfun[[1]] <-   eval(substitute(function(x){x[1] +
-                  c(  x[seq(stix,length.out=(length(dts)-1))])},list(stix=tix)))
+              ltmpfun[[1]] <-   drop(eval(substitute(function(x){x[1] +
+                  c(  x[seq(stix,length.out=(length(dts)-1))])},list(stix=tix))))
               ptmpfun[[1]] <-   eval(substitute(function(x){sum(dnorm(x[seq(stix,length.out=(length(dts)-1))],0,exp(x[3+cumsum(RE)[1]]),log=T))}, list(stix=tix)))
               reix[[jj]] <- c(seq(tix,length.out=lns[jj]))
               tix = tix+lns[jj];
@@ -473,27 +480,27 @@
         # Diversity dependence in any of the rates
 
         if (DivDep[1]==T){
-          ltmpfun[[4]] = function(x){x[(4+sum(RE))]*n_norm(x)}
+          ltmpfun[[4]] = function(x){drop(x[(4+sum(RE))]*n_norm(x))}
         }  else {
           ltmpfun[[4]] = function(x){rep(0,length(dts)-1)};
         }
         if (DivDep[2]==T){
-          ltmpfun[[5]] = function(x){x[(4+sum(RE)+DivDep[1]*1)]*n_norm(x)}
+          ltmpfun[[5]] = function(x){drop(x[(4+sum(RE)+DivDep[1]*1)]*n_norm(x))}
         } else {
           ltmpfun[[5]] = function(x){rep(0,length(dts)-1)};
         }
         # ptmpfun[[4]] <- function(x){sum(dnorm(x[seq(4+sum(RE),length.out=sum(DivDep))],0,5,log=T))};
       }
-      if (sum(SpecInt)>0){
+      if (sum(Driv_x_Div_Spec)>0){
         # if interaction between driver AND diversity.
         ## NOT DONE: need to use colsums somewhere here, but not entirely sure about the structure of the matrix/pars.
-        ltmpfun[[6]] = function(x){sapply(1:sum(SpecInt),function(ii){n_norm(x)*SpecTS[which(SpecInt)[ii],]*x[alphinx[[6]][ii]]})}
+        ltmpfun[[6]] = drop(function(x){sapply(1:sum(Driv_x_Div_Spec),function(ii){n_norm(x)*SpecTS[which(Driv_x_Div_Spec)[ii],]*x[alphinx[[6]][ii]]})})
       }
-      if (sum(ExtInt)>0){
+      if (sum(Driv_x_Div_Ext)>0){
         # if interaction between driver AND diversity.
         ## NOT DONE: need to use colsums somewhere here, but not entirely sure about the structure of the matrix/pars.
-        # ltmpfun[[7]] = function(x){sapply(which(ExtInt),function(ii){n_norm(x)*ExtTS[ii,]*x[alphinx[[7]][ii]]})}{0}
-        ltmpfun[[7]] = function(x){sapply(1:sum(ExtInt),function(ii){n_norm(x)*ExtTS[which(ExtInt)[ii],]*x[alphinx[[7]][ii]]})}
+        # ltmpfun[[7]] = function(x){sapply(which(Driv_x_Div_Ext),function(ii){n_norm(x)*ExtTS[ii,]*x[alphinx[[7]][ii]]})}{0}
+        ltmpfun[[7]] = drop(function(x){sapply(1:sum(Driv_x_Div_Ext),function(ii){n_norm(x)*ExtTS[which(Driv_x_Div_Ext)[ii],]*x[alphinx[[7]][ii]]})})
       }
 
       specfunc <- function(x){rowSums(cbind(drop(ltmpfun[[1]](x)),drop(ltmpfun[[4]](x)),drop(ltmpfun[[6]](x))))}

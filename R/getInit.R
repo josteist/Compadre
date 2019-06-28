@@ -1,4 +1,4 @@
-#' A function to generate sensible initial values for MCMC estamation.
+#' A function to generate sensible initial values for MCMC estimation.
 #'
 #' getInits generates initial values for a complex CMR model. Essentially the global parameters (mean rates) are estimated optimizing the probability density function, assuming all random effects are 0. Then each random effect is estimated independently, assuming all other random effects are 0. This is not proper optimization, but work reasonably well for initial values.
 #' @param cmrModel A CMR model structure.
@@ -17,12 +17,16 @@ getInit <- function(cmrModel){
   # The main parameters will be estimated by optim ignoring the random effects afterwhich all the RE will be optimzed independently (1 dimension at a time).
   # This will not be proper optimization, but be better initial values for analysis.
   # Change to also include drivers, but NOT variances.
+  if (cmrModel$npar>3){
   x <- c(optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$npar-3)))})$par,
-         1,1,1,rep(0,cmrModel$npar-6))
-  xres <- sapply((1+cmrModel$nhps):(cmrModel$npar),function(jj){
+         rep(1,cmrModel$nhps-3),rep(0,cmrModel$npar-cmrModel$nhps))
+  xres <- sapply((min(unlist(cmrModel$reix))):(max(unlist(cmrModel$reix))),function(jj){
     optim(0,function(yy){-cmrModel$probfun(c(x[1:(jj-1)],yy,x[(jj+1):cmrModel$npar]))},
           method='Brent',lower=-10,upper=10)$par})
-  x[7:cmrModel$npar]=xres;
+  x[(cmrModel$nhps+1):cmrModel$npar]=xres;
+  } else {
+    x <- optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(x)})$par
+  }
   return(x0=x)
 }
 

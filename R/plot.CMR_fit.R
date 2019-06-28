@@ -5,7 +5,7 @@ plot.CMR_fit <- function(fit,...){
 
   if (dim(fit$Chain)[2]==3){
     # only three rates
-
+    tmp <- exp(fit$Chain[-c(1:dim(fit$Chain)[1]/2),]);
     d1 <- density(exp(fit$Chain[-c(1:dim(fit$Chain)[1]/2),1]),from=0)
     d2 <- density(exp(fit$Chain[-c(1:dim(fit$Chain)[1]/2),2]),from=0)
     d3 <- density(exp(fit$Chain[-c(1:dim(fit$Chain)[1]/2),3]),from=0)

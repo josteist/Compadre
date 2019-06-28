@@ -6,9 +6,10 @@
 \usage{
 make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
   FALSE), SpecTS = NULL, ExtTS = NULL, SmpTS = NULL,
-  DivDep = c(FALSE, FALSE), SpecInt = NULL, ExtInt = NULL,
-  pfix = 2, priorsNorm_Cov = c(0, 2), priorsNorm_Mus = rep(list(c(-4,
-  4)), 3), priorsUnif = c(-3, 3), replRE_1 = F)
+  DivDep = c(FALSE, FALSE), Driv_x_Div_Spec = NULL,
+  Driv_x_Div_Ext = NULL, pfix = 2, priorsNorm_Cov = c(0, 2),
+  priorsNorm_Mus = rep(list(c(-4, 4)), 3), priorsUnif = c(-3, 3),
+  replRE_1 = F)
 }
 \arguments{
 \item{Obs}{a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
@@ -25,7 +26,7 @@ make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
 
 \item{DivDep}{a switch to set inclusion of diversity dependence in speciation and extinction rates, respectively. Defaults to c(FALSE, FALSE)}
 
-\item{SpecInt}{a vector with TRUE/FALSE for which drivers interact with the diversity-dependent term. If TRUE a separate parameter for the impact of Driver*Diversity is estimated.}
+\item{Driv_x_Div_Spec}{a vector with TRUE/FALSE for which drivers interact with the diversity-dependent term. If TRUE a separate parameter for the impact of Driver*Diversity is estimated.}
 
 \item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.}
 

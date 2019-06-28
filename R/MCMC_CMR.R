@@ -1,8 +1,8 @@
 #' An adaptive Markov chain Monte Carlo sampler for estimating parameters of a CMR_model.
 #'
-#' After generating a model using \link{make.BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burning phase is used for proposals in the latter half, insert ref here.
+#' After generating a model using \link{make_BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burning phase is used for proposals in the latter half, insert ref here.
 #'
-#' @param cmrModel is a model generated with make.BayesCMR
+#' @param cmrModel is a model generated with make_BayesCMR
 #' @param niter is number of iterations. Defaults to 1e3.
 #' @param nthin sets the thinning, i.e. samples for each nthin iterations are stored as output. Defaults to 10.
 #' @param vmin sets the minimum and initial standard deviation of the normal proposals.

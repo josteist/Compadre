@@ -2,7 +2,7 @@
 % Please edit documentation in R/getInit.R
 \name{getInit}
 \alias{getInit}
-\title{A function to generate sensible initial values for MCMC estamation.}
+\title{A function to generate sensible initial values for MCMC estimation.}
 \usage{
 getInit(cmrModel)
 }

@@ -92,6 +92,6 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   # }
   # abline(v=union(stgs$min_ma,stgs$max_ma),col=rgb(0.1,0.1,0.1,0.1))
   #
- out <- list(SpecRates= spec_smps,ExtRates = ext_smps,SampRates = smp_smps)
+ out <- list(SpecRates= spec_smps,ExtRates = ext_smps,SampRates = smp_smps);
   return(out)
 }

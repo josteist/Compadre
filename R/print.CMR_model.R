@@ -14,9 +14,10 @@ print.CMR_model <- function(mod){
       cat('Extinction rate: ',length(mod$aix$Covar_Extinction),'external driver(s)\n')
       cat('Sampling rate:   ',length(mod$aix$Covar_Sampling),'external driver(s)\n')
       cat('Diversity dependence is',ifelse(length(mod$aix$DivDep_Speciation)>0,'ON','OFF'),'for speciation ')
-      cat('and',ifelse(length(mod$aix$DivDep_Extinction)>0,'ON','OFF'),'for extinction rates.')
+      cat('and',ifelse(length(mod$aix$DivDep_Extinction)>0,'ON','OFF'),'for extinction rates.\n')
+      cat('Drivers interact with')
     }
-    # cat('\n')
+    cat('\n')
     if (sum(sapply(mod$reix,length)>0)==3){
       cat('All rates vary over time.')
     } else if (sum(sapply(mod$reix,length)>0)==2){
