@@ -36,8 +36,13 @@ par(mfrow=c(2,2))
 matplot(fx1$Chain[,M1$clade1inx[1:3]],type="l")
 matplot(fx1$Chain[,M1$clade2inx[1:3]],type="l")
 matplot(fx1$Chain[,M1$intinx],type="l")
-ma <- make_BayesCMR(O1,dts=dts,DivDep=c(T,T),RE=c(T,T,T))#,SpecTS = t(drivers),SpecInt =c(T,T))
-mb <- make_BayesCMR(O2,dts=dts,DivDep=c(T,T),RE=c(T,T,T))#,ExtTS = t(drivers[,1]),ExtInt=c(T))
+ma <- make_BayesCMR(O1,dts=dts,DivDep=c(T,T),RE=c(T,T,T),
+                    SpecTS = t(drivers),
+                    ExtTS  = t(drivers),
+                    Driv_x_Div_Spec  =c(T,T),
+                    Driv_x_Div_Ext   =c(T,T))
+mb <- make_BayesCMR(O2,dts=dts,DivDep=c(T,T),RE=c(T,T,T),
+                    Driv_x_Div_Ext  = t(drivers[,1]),ExtInt=c(T))
 
 fa <- MCMC_CMR(ma,niter=5e5,draweps=5e2,vmin=1e-4)
 fb <- MCMC_CMR(mb,niter=5e5,draweps=5e2,vmin=1e-4)

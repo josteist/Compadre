@@ -15,8 +15,8 @@ print.CMR_model <- function(mod){
       cat('Sampling rate:   ',length(mod$aix$Covar_Sampling),'external driver(s)\n')
       cat('Diversity dependence is',ifelse(length(mod$aix$DivDep_Speciation)>0,'ON','OFF'),'for speciation ')
       cat('and',ifelse(length(mod$aix$DivDep_Extinction)>0,'ON','OFF'),'for extinction rates.\n')
-      cat(c('','Drivers interact with diversity impacting speciation rates')[1+(length(mod$aix$`Interaction Spec:driver*diversity`)>0)*1])
-      cat(c('','Drivers interact with diversity impacting extinction rates')[1+(length(mod$aix$`Interaction Ext:driver*diversity`)>0)*1])
+      cat(c('','Drivers interact with diversity impacting speciation rates.\n')[1+(length(mod$aix$`Interaction Spec:driver*diversity`)>0)*1])
+      cat(c('','Drivers interact with diversity impacting extinction rates.\n')[1+(length(mod$aix$`Interaction Ext:driver*diversity`)>0)*1])
 
     }
     cat('\n')
