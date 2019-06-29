@@ -2,18 +2,30 @@
 % Please edit documentation in R/plotRates.R
 \name{plotRates}
 \alias{plotRates}
-\title{Plot macroevolutionary rates from a CMR model fit.}
+\title{Extract and plot macroevolutionary rates from a CMR model fit.}
 \usage{
-plotRates(fit_1, max_ma = sum(fit_1$Model$dts), botcols = NULL,
-  logax = T, qs = c(0.025, 0.5, 0.975))
+plotRates(cmrfit, max_ma = sum(cmrfit$Model$dts), botcols = NULL,
+  logax = T, draws = 250, quantiles = c(0.025, 0.5, 0.975),
+  plot = T)
 }
 \arguments{
-\item{fit_1}{A model fit, as output from \link{MCMC_CMR}}
+\item{cmrfit}{A model fit, as output from \link{MCMC_CMR}}
 
-\item{max_ma}{(optional) a maximum age for the oldest interval.}
+\item{max_ma}{(optional) a maximum age for the oldest interval, if not given assumed to be sum of all interval durations in cmrfit}
 
 \item{botcols}{(optional) a list of colors for each interval. If supplied the lower part of the lower panel is colored.}
+
+\item{logax}{(T/F), use log y-axis for plotting}
+
+\item{draws}{number of samples drawn from the MCMC chain (single number). Alternatively could be set of values indexing into the MCMC-chain.}
+
+\item{plot}{(T/F) if plot figure, defaults to TRUE.}
+
+\item{qauntiles}{gives the upper and lower quantiles for plotting bars around median, and the centre. Defaults to c(0.025,0.5,0.975).}
+}
+\value{
+returns a list of three matrices with sampled rates; $SpecRates, $ExtRates and $SampRates.
 }
 \description{
-Plot macroevolutionary rates from a CMR model fit.
+Extract and plot macroevolutionary rates from a CMR model fit.
 }

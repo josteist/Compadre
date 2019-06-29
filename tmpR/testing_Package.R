@@ -1,7 +1,7 @@
 # Testing two interacting clades.
 library(Compadre)
 stages = GSA_timescale[GSA_timescale$scale_level==5,]
-do = seq(90,8,by=-1)
+do = seq(50,38,by=-1)
 # 90 to 8 is 'Phanerozoic'
 stages[do,]$interval_name
 drivers <- Proxies[do[-length(do)],1:2] # not driver for last bin
@@ -15,22 +15,48 @@ plot(cumsum(dts),colSums(Obs>0),type="o")
 set.seed(190480)
 
 # Splitting randomly
-O1 <- Obs[1:20000,];
-O2 <- Obs[20001:61834,]
+O1 <- Obs[1:4000,];
+O2 <- Obs[4001:10264,]
 dim(O1)
 
 M1 <- make_BayesCMR_2clades(O1,O2,dts = dts,RE=c(T,T,T),
-                            DivDepSpecMatrix = matrix(c(1,2,1,2),ncol=2),
-                            DivDepExtMatrix = matrix(c(3,4,3,4),ncol=2),
-                            SpecTS1 = t(drivers),
-                            ExtTS2  = t(drivers[,1]),
-                            Driv_x_Div_Spec_1 = c(T,T),
-                            Driv_x_Div_Ext_2  = c(T))
+                            DivDepSpecMatrix = matrix(c(1,NA,NA,2),ncol=2),
+                            DivDepExtMatrix = matrix(c(3,NA,NA,4),ncol=2))
+                            # SpecTS_1 = t(drivers),
+                            # ExtTS_2  = t(drivers[,1]),
+                            # Driv_x_Div_Spec_1 = c(T,T),
+                            # Driv_x_Div_Ext_2  = c(T))
+
+xx = runif(M1$npar,min=-0.03,max=0.03)
+xx[M1$clade1inx[1:3]]=runif(3,min=-3,max=-2.3)
+xx[M1$clade2inx[1:3]]=runif(3,min=-3,max=-2.3)
+fx1 <- MCMC_CMR(M1,vmin=1e-5,x0=xx,
+                niter=1e6,nthin=500)
+par(mfrow=c(2,2))
+matplot(fx1$Chain[,M1$clade1inx[1:3]],type="l")
+matplot(fx1$Chain[,M1$clade2inx[1:3]],type="l")
+matplot(fx1$Chain[,M1$intinx],type="l")
+ma <- make_BayesCMR(O1,dts=dts,DivDep=c(T,T),RE=c(T,T,T))#,SpecTS = t(drivers),SpecInt =c(T,T))
+mb <- make_BayesCMR(O2,dts=dts,DivDep=c(T,T),RE=c(T,T,T))#,ExtTS = t(drivers[,1]),ExtInt=c(T))
+
+fa <- MCMC_CMR(ma,niter=5e5,draweps=5e2,vmin=1e-4)
+fb <- MCMC_CMR(mb,niter=5e5,draweps=5e2,vmin=1e-4)
+par(mfrow=c(2,2))
+matplot(fx1$Chain[,M1$intinx[c(1,3)]],type="l")
+matplot(fa$Chain[,unlist(ma$aix)],type="l")
+matplot(fx1$Chain[,M1$intinx[c(2,4)]],type="l")
+matplot(fb$Chain[,unlist(mb$aix)],type="l")
+
+
+
 xx = runif(M1$npar,min=-0.01,max=0.1)
-xx[M1$intinx]=0.1
+xx[M1$clade1inx[1:3]]=runif(3,min=-3,max=-2.3)
+xx[M1$clade2inx[1:3]]=runif(3,min=-3,max=-2.3)
+
 M1$myp_test(xx)
 
-xx = runif(M1$npar,min=-1,max=1)
+M1$probfun(xx)
+xx m1$= runif(M1$npar,min=-1,max=1)
 M1$myp_test(xx)$ll1
 # It depends on the parameters, how the fuck did that come about?
 # SO I guess it's one of the rates that are pushing against the boundary.
@@ -57,7 +83,10 @@ hpl1 <- sapply(1:3,function(ii){
 ma <- make_BayesCMR(O1,dts=dts,DivDep=c(T,T),SpecTS = t(drivers),SpecInt =c(T,T))
 mb <- make_BayesCMR(O2,dts=dts,DivDep=c(T,T),ExtTS = t(drivers[,1]),ExtInt=c(T))
 # Why is this Soooooo slow?
-fx1 <- MCMC_CMR(M1,vmin=1e-5,x0=runif(M1$npar,min=-0.05,max=0.05),
+xx = runif(M1$npar,min=-0.03,max=0.03)
+xx[M1$clade1inx[1:3]]=runif(3,min=-3,max=-2.3)
+xx[M1$clade2inx[1:3]]=runif(3,min=-3,max=-2.3)
+fx1 <- MCMC_CMR(M1,vmin=1e-5,x0=xx,
                 niter=1e5,nthin=100)
 
 # While slightly strange, all interaction coeffs are >0, i.e.

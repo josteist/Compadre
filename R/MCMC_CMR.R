@@ -13,7 +13,7 @@
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
 #'
-MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-1,
+MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-4,
                          draweps=niter/100,
                          x0=NULL,
                          cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),

@@ -67,7 +67,9 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
 
   # Now let the DivDepSpecMatrix and DivDepExtMatrix be MATRICES WITH NUMBERED INDEXES. Let non-interactions be 0
   # I.e. for symmetric interactions (summed richness)
-  revarix <- seq(4,length.out=sum(RE))
+  revarix <- rep(NA,3);
+  revarix[RE] = seq(4,length.out=sum(RE));
+    # seq(4,length.out=sum(RE))
   muk1 <- make_unvd(Obs1*1);
   u1 <- muk1$u
   n1 <- muk1$n
@@ -134,8 +136,8 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
     mpl1 <- sum(dnorm(x_b[xix1[1:3]],0,10),log=T) + # prior for µs
       sum(dnorm(x_b[xix2[1:3]],0,10,log=T)) + # prior for µs
       sum(dnorm(x_b[xinx],0,10,log=T)) + #prior for the interactions
-      ifelse(any(RE),sum(dunif(x_b[xix1[revarix]],min=-3,max=1,log=T))+
-               sum(dunif(x_b[xix2[revarix]],min=-3,max=1,log=T)),0)
+      ifelse(any(RE),sum(dunif(x_b[xix1[revarix]],min=-3,max=1,log=T),na.rm=T)+
+               sum(dunif(x_b[xix2[revarix]],min=-3,max=1,log=T),na.rm=T),0)
     # ALSO NEED PRIORS FOR THE DRIVERS.
 
     p_tot = ll1$LogL + ll2$LogL + ifelse(length(hpl1)>0,sum(hpl1),0) +

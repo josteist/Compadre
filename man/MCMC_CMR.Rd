@@ -4,7 +4,7 @@
 \alias{MCMC_CMR}
 \title{An adaptive Markov chain Monte Carlo sampler for estimating parameters of a CMR_model.}
 \usage{
-MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 0.1,
+MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 1e-04,
   draweps = niter/100, x0 = NULL,
   cvstp = (2.38/(sqrt(cmrModel$npar)))^2 * diag(vmin, cmrModel$npar),
   adapt = TRUE)

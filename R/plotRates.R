@@ -1,31 +1,40 @@
-#' Plot macroevolutionary rates from a CMR model fit.
+#' Extract and plot macroevolutionary rates from a CMR model fit.
 #'
-#' @param fit_1 A model fit, as output from \link{MCMC_CMR}
-#' @param max_ma (optional) a maximum age for the oldest interval.
+#' @param cmrfit A model fit, as output from \link{MCMC_CMR}
+#' @param max_ma (optional) a maximum age for the oldest interval, if not given assumed to be sum of all interval durations in cmrfit
 #' @param botcols (optional) a list of colors for each interval. If supplied the lower part of the lower panel is colored.
+#' @param logax (T/F), use log y-axis for plotting
+#' @param draws number of samples drawn from the MCMC chain (single number). Alternatively could be set of values indexing into the MCMC-chain.
+#' @param qauntiles gives the upper and lower quantiles for plotting bars around median, and the centre. Defaults to c(0.025,0.5,0.975).
+#' @param plot (T/F) if plot figure, defaults to TRUE.
+#' @return returns a list of three matrices with sampled rates; $SpecRates, $ExtRates and $SampRates.
 #' @export
 
-plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T,qs = c(0.025,0.5,0.975)){
+plotRates <- function(cmrfit,max_ma= sum(cmrfit$Model$dts),botcols =NULL,logax = T,draws = 250,quantiles = c(0.025,0.5,0.975),plot=T){
   # have max_ma as input instead of stgs, and possibly a list of colors.
-  # thus boundaries are max_ma+c(0,cumsum(fit_1$Model$dts))
+  # thus boundaries are max_ma+c(0,cumsum(cmrfit$Model$dts))
   # also store par(stuff) and return settings to old after plott.
   # plpars <- par();
   olp <- par(no.readonly = TRUE);
   on.exit(par(olp))
-  bnds <- rev(max_ma+c(0,cumsum(rev(fit_1$Model$dts))))-sum(fit_1$Model$dts);
+  bnds <- rev(max_ma+c(0,cumsum(rev(cmrfit$Model$dts))))-sum(cmrfit$Model$dts);
   if (logax){
     tmpl = 'y'
   } else {
     tmpl = ''
   }
-  tpl <- ceiling(seq(dim(fit_1$Chain)[1]/2,dim(fit_1$Chain)[1],length.out=250));
+  if (length(draws)==1){
+  tpl <- ceiling(seq(dim(cmrfit$Chain)[1]/2,dim(cmrfit$Chain)[1],length.out=draws));
+  } else {
+    tpl = draws
+  }
   par(mfrow=c(3,1),mar=c(2,4,.2,1))
 
   # extracting spc rate quantile
   spec_smps <- exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$specfun(fit_1$Chain[tpl[ii],])})))
+    cmrfit$Model$specfun(cmrfit$Chain[tpl[ii],])})))
   tmp <- apply(spec_smps,1,
-    mf<-function(k){quantile(k,qs)})
+    mf<-function(k){quantile(k,quantiles)})
 
   # plot(rev((stgs$max_ma))[-1],tmp[2,],type="o",lty=0,col='black',pch=19,
   plot(bnds[-c(1,length(bnds))],tmp[2,],type="o",lty=0,col='black',pch=19,
@@ -40,9 +49,9 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
 
   # extinction quantile
   ext_smps <- exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$extfun(fit_1$Chain[tpl[ii],])})))
+    cmrfit$Model$extfun(cmrfit$Chain[tpl[ii],])})))
   tmp <- apply(ext_smps,1,
-    mf<-function(k){quantile(k,qs)})
+    mf<-function(k){quantile(k,quantiles)})
   plot(bnds[-c(1,length(bnds))],tmp[2,],type="o",lty=0,col='black',pch=19,
        xlim = c(max(bnds)+3,min(bnds-3)),
        xaxt='n',log=tmpl,ylab='Extinction rate',
@@ -56,9 +65,9 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
 
   # sampling quantiles
   smp_smps <- exp((sapply(1:length(tpl),function(ii){
-    fit_1$Model$ratefun[[3]](fit_1$Chain[tpl[ii],])})))
+    cmrfit$Model$ratefun[[3]](cmrfit$Chain[tpl[ii],])})))
   tmp <- apply(smp_smps,1,
-    mf<-function(k){quantile(k,qs)})
+    mf<-function(k){quantile(k,quantiles)})
   plot((bnds[-1]+bnds[-length(bnds)])/2,tmp[2,],type="o",lty=0,col='black',pch=19,
        xlim = c(max(bnds)+3,min(bnds-3)),xaxt='n',
        log=tmpl,ylab='Sampling rate',
@@ -92,6 +101,6 @@ plotRates <- function(fit_1,max_ma= sum(fit_1$Model$dts),botcols =NULL,logax = T
   # }
   # abline(v=union(stgs$min_ma,stgs$max_ma),col=rgb(0.1,0.1,0.1,0.1))
   #
- out <- list(SpecRates= spec_smps,ExtRates = ext_smps,SampRates = smp_smps);
-  return(out)
+ out <- list(SpecRates= spec_smps,ExtRates = ext_smps,SampRates = smp_smps)
+  return(invisible(out))
 }

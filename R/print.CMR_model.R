@@ -15,7 +15,9 @@ print.CMR_model <- function(mod){
       cat('Sampling rate:   ',length(mod$aix$Covar_Sampling),'external driver(s)\n')
       cat('Diversity dependence is',ifelse(length(mod$aix$DivDep_Speciation)>0,'ON','OFF'),'for speciation ')
       cat('and',ifelse(length(mod$aix$DivDep_Extinction)>0,'ON','OFF'),'for extinction rates.\n')
-      cat('Drivers interact with')
+      cat(c('','Drivers interact with diversity impacting speciation rates')[1+(length(mod$aix$`Interaction Spec:driver*diversity`)>0)*1])
+      cat(c('','Drivers interact with diversity impacting extinction rates')[1+(length(mod$aix$`Interaction Ext:driver*diversity`)>0)*1])
+
     }
     cat('\n')
     if (sum(sapply(mod$reix,length)>0)==3){
@@ -24,7 +26,7 @@ print.CMR_model <- function(mod){
       cat(c('Speciation','Extinction','Sampling')[which(sapply(mod$reix,length)>0)[1]],' and ',
           c('speciation','extinction','sampling')[which(sapply(mod$reix,length)>0)[2]],' rates vary over time.')
     } else if (sum(sapply(mod$reix,length)>0)==1){
-      cat(c('Speciation','Extinction','Sampling')[which.min(sapply(mod$reix,length)>0)],' rates vary over time.')
+      cat(c('Speciation','Extinction','Sampling')[min(which(sapply(m1$reix,length)>0))],' rates vary over time.')
     } else {
       cat('\n')
       cat('No rates vary over time (i.e. have random terms).')
