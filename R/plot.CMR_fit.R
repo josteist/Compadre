@@ -2,7 +2,7 @@
 plot.CMR_fit <- function(fit,...){
   # simple wrapper to plot both the rates and the drivers.
   # a switch, if only three rates (i.e. no RE's or drivers, then just plot the density of the posterior)
-
+  if (is.null(mod$clade1inx)){ #If not interacting clades
   if (dim(fit$Chain)[2]==3){
     # only three rates
     tmp <- exp(fit$Chain[-c(1:dim(fit$Chain)[1]/2),]);
@@ -29,7 +29,12 @@ plot.CMR_fit <- function(fit,...){
                      rgb(0.1,0.8,0.1,0.6)))
 
       } else {
-  tmp <- plotRates(fit,...)
+  tmp <- invisible(plotRates(fit,...))
       }
+    # Also input a plot of the drivers here.
+  } else {
+    # Interacting clades.
+    cat('Plotting for interacting clades is not developed yet. Figure it out for yourself!')
+  }
   return(tmp)
 }

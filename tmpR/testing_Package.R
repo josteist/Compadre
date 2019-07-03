@@ -1,18 +1,47 @@
 # Testing two interacting clades.
 library(Compadre)
 stages = GSA_timescale[GSA_timescale$scale_level==5,]
-do = seq(50,38,by=-1)
+  do = seq(20,8,by=-1)
 # 90 to 8 is 'Phanerozoic'
 stages[do,]$interval_name
-drivers <- Proxies[do[-length(do)],1:2] # not driver for last bin
-dts = rev(stages$max_ma-stages$min_ma)[do]
+drivers <- Proxies[do,1:2] # not driver for last bin
+dts = stages[do,]$max_ma-stages[do,]$min_ma
+names(dts) <- stages[do,]$interval_name
 Obs = (1*(InvertPBDB>0))[,do]
 Obs <- Obs[which(rowSums(Obs)>0),]
 dim(Obs)
 
+ma <- make_BayesCMR_new(Obs,dts,
+                        spec= ~div+time,
+                        ext = ~time+d180,
+                        samp = ~time,
+                        data = drivers)
+mb <- make_BayesCMR(Obs,dts,DivDep=c(T,F),
+                    RE=c(T,T,T),ExtTS = drivers[1:12,1])
+x = runif(ma$npar,min=-0.03,max=0.03)
+x[1:3] = runif(3,min=-3,max=-2)
+x[4:max(unlist(mb$aix))]=0
+# parameters don't have the same order anymore
+ma$likfun(x)$LogL
+mb$likfun(x)$LogL
+# Something is weird
+
+ma$specfun(x)
+mb$specfun(x)
+
+ma$extfun(x)
+mb$extfun(x)
+
+ma$sampfun(x)
+mb$ratefun[[3]](x)
+
 
 plot(cumsum(dts),colSums(Obs>0),type="o")
-set.seed(190480)
+m1 <- make_BayesCMR(Obs,dts,RE=c(T,T,T))
+set.seed(190712)
+x <- getInit(m1)
+f1 <- MCMC_CMR(m1,niter=1e5,x0=x,vmin=1e-2,
+               draweps=200,nthin=10)
 
 # Splitting randomly
 O1 <- Obs[1:4000,];
