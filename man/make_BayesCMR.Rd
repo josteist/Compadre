@@ -4,10 +4,8 @@
 \alias{make_BayesCMR}
 \title{Function to construct one clade CMR-model.}
 \usage{
-make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
-  FALSE), SpecTS = NULL, ExtTS = NULL, SmpTS = NULL,
-  DivDep = c(FALSE, FALSE), Driv_x_Div_Spec = NULL,
-  Driv_x_Div_Ext = NULL, pfix = 2, priorsNorm_Cov = c(0, 2),
+make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), spec = ~1, ext = ~1,
+  samp = ~1, data = NULL, pfix = 2, priorsNorm_Cov = c(0, 2),
   priorsNorm_Mus = rep(list(c(-4, 4)), 3), priorsUnif = c(-3, 3),
   replRE_1 = F)
 }
@@ -16,17 +14,7 @@ make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
 
 \item{dts}{a vector of interval durations. Defaults to a series of 1's if not supplied. Oldest interval is first entry.}
 
-\item{RE}{a vector of TRUE/FALSE statements whether or not to allow rates to vary across intervals for speciation, extinction and sampling rates, respectively. Defaults to c(FALSE, FALSE, FALSE)}
-
-\item{SpecTS}{a vector or matrix of drivers for speciation rate. One row for each driver and one column for all but the last interval (i.e. \emph{n-1}, since there is no rate transitioning out of the last interval). Defaults to NULL. Oldest interval is first column.}
-
-\item{ExtTS}{a vector or matrix of drivers for extinction rates. Defaults to NULL. Oldest interval is first column. Each driver of length \emph{n-1}.}
-
-\item{SmpTS}{a vector or matrix of drivers for sampling rates. One row for each driver and one column for each interval. Defaults to NULL. Oldest interval is first column. Each driver has \emph{n} entries.}
-
-\item{DivDep}{a switch to set inclusion of diversity dependence in speciation and extinction rates, respectively. Defaults to c(FALSE, FALSE)}
-
-\item{Driv_x_Div_Spec}{a vector with TRUE/FALSE for which drivers interact with the diversity-dependent term. If TRUE a separate parameter for the impact of Driver*Diversity is estimated.}
+\item{data}{a data frame with putative drivers.}
 
 \item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.}
 
@@ -36,7 +24,7 @@ make_BayesCMR(Obs, dts = rep(1, dim(Obs)[2]), RE = c(FALSE, FALSE,
 
 \item{priorsUnif}{sets the parameters for the uniform prior for the log variances of the random efSpecTS. Same for all three variances, dunif(-3,3).}
 
-\item{replRE_1}{a switch for how to deal with very special drivers. Not fully implemented or tested properly.}
+\item{spec/ext/samp}{are formulas specifying the particular model. Use 'time' for temporally variable rates, 'div' for diversity dependence. Other drivers should have names as entries into \emph{data}}
 }
 \value{
 The function returns an object of class CMR_model. This most important output is out$probfun which is a function for the posterior. This output can be fed directly into the sampler \link{MCMC_CMR}. It also returns \emph{Obs} and \emph{dts} as well as the full call (exlcluding default settings), \emph{call}

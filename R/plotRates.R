@@ -65,7 +65,7 @@ plotRates <- function(cmrfit,max_ma= sum(cmrfit$Model$dts),botcols =NULL,logax =
 
   # sampling quantiles
   smp_smps <- exp((sapply(1:length(tpl),function(ii){
-    cmrfit$Model$ratefun[[3]](cmrfit$Chain[tpl[ii],])})))
+    cmrfit$Model$sampfun(cmrfit$Chain[tpl[ii],])})))
   tmp <- apply(smp_smps,1,
     mf<-function(k){quantile(k,quantiles)})
   plot((bnds[-1]+bnds[-length(bnds)])/2,tmp[2,],type="o",lty=0,col='black',pch=19,
