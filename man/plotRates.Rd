@@ -4,7 +4,7 @@
 \alias{plotRates}
 \title{Extract and plot macroevolutionary rates from a CMR model fit.}
 \usage{
-plotRates(cmrfit, max_ma = sum(cmrfit$Model$dts), botcols = NULL,
+plotRates(cmrfit, max_ma = sum(cmrfit$Model$dts), stages = NULL,
   logax = T, draws = 250, quantiles = c(0.025, 0.5, 0.975),
   plot = T)
 }
@@ -13,7 +13,7 @@ plotRates(cmrfit, max_ma = sum(cmrfit$Model$dts), botcols = NULL,
 
 \item{max_ma}{(optional) a maximum age for the oldest interval, if not given assumed to be sum of all interval durations in cmrfit}
 
-\item{botcols}{(optional) a list of colors for each interval. If supplied the lower part of the lower panel is colored.}
+\item{stages}{(optional) a data.frame of stages used for the analysis. Values max_ma,min_ma and colors are used to color the plot.}
 
 \item{logax}{(T/F), use log y-axis for plotting}
 

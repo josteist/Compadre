@@ -18,12 +18,12 @@ getInit <- function(cmrModel){
   # This will not be proper optimization, but be better initial values for analysis.
   # Change to also include drivers, but NOT variances.
   if (cmrModel$npar>3){
-  x <- c(optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$npar-3)))})$par,
-         rep(1,cmrModel$nhps-3),rep(0,cmrModel$npar-cmrModel$nhps))
-  xres <- sapply((min(unlist(cmrModel$reix))):(max(unlist(cmrModel$reix))),function(jj){
-    optim(0,function(yy){-cmrModel$probfun(c(x[1:(jj-1)],yy,x[(jj+1):cmrModel$npar]))},
-          method='Brent',lower=-10,upper=10)$par})
-  x[(cmrModel$nhps+1):cmrModel$npar]=xres;
+    x <- c(optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$npar-3)))})$par,
+           rep(1,cmrModel$nhps-3),rep(0,cmrModel$npar-cmrModel$nhps))
+    xres <- sapply((min(unlist(cmrModel$reix))):(max(unlist(cmrModel$reix))),function(jj){
+      optim(0,function(yy){-cmrModel$probfun(c(x[1:(jj-1)],yy,x[(jj+1):cmrModel$npar]))},
+            method='Brent',lower=-10,upper=10)$par})
+    x[(cmrModel$nhps+1):cmrModel$npar]=xres;
   } else {
     x <- optim(c(-1,-1.1,-1.2),function(x){-cmrModel$probfun(x)})$par
   }
