@@ -20,21 +20,18 @@ Compadre requires a couple of other packages (coda, mvtnorm etc), but you'll fig
 The basic input to a model is a matrix of 0/1 for observed lineages over intervals and
 a vector of temporal durations of these intervals. For each rate (speciation, extinction,
 and sampling) one can feed the model-generating function with basic formulas in R. First
-a simple example. Diversification during the Mesozoic.
+a simple example: Diversification during the Jurassic & Cretaceous.
 
-Extract the geological stages from the in-package timescale.
+Extract the geological stages from the in-package timescale (GSA_timescale) and invertebrate fossil database (InvertPBDB). Drivers are extracted from data.frame Proxies.
 ```
 stages = GSA_timescale[GSA_timescale$scale_level==5,] #GSA_timescale is internal to the package. scale_level 5 is stages. Identical to timescale used by PBDB
 do = seq(45,23,by=-1) # Which intervals to use. 100 is Fortunian (first cambrian stage) 1 is Holocene
-# 52-23 is the Mesozoic
-# Doing 45 - 23, Jurassic/Cretaceous
-stages[do,]$interval_name #Names of the stages
+# Doing intervals indexed 45 through 23, Jurassic/Cretaceous
 drivers <- Proxies[do,] # Picking out the drivers for this example. All drivers are in object 'Proxies' internal to the package.
 dts = stages[do,]$max_ma-stages[do,]$min_ma # Getting the durations of the intervals
 names(dts) <- stages[do,]$interval_name # Naming the durations.
 Obs = (1*(InvertPBDB>0))[,do] # Extracting the species level invert data to relevant times. InvertPBDB is the big matrix included in the package.
 Obs <- Obs[which(rowSums(Obs)>0),] #Removing the ones not observed in the Mesozoic
-dim(Obs)
 ```
 
 There are 14912 species in this dataset.
@@ -54,11 +51,13 @@ colbottom(stages[do,]) # This simple function adds colors at the bottom, from th
 
 ```
 
-![Figure 1:] (https://github.com/josteist/Compadre/tree/master/extra/fig1.png)
+![raw_count] (https://github.com/josteist/Compadre/blob/master/extra/fig1.png)
 
 ### Simple model
 A simple model with no temporal variability and no drivers. Essentially:
 what is the man speciation, extinction and sampling rates across the Mesozoic?
+Any model is constructed by passing an obvervation matrix (taxa in rows, intervals in columns) with
+1 indicating the taxa was observed within each interval. Additionally we pass a vector of durations for the intervals (here dts).
 
 ```
 # For reproducability.
@@ -90,10 +89,12 @@ plots are just distributions of estimated mean rates.
 ```
 plot(fa)
 ```
-![Figure 2:](https://github.com/josteist/Compadre/tree/master/extra/fig2.png)
+![plorate 1](https://github.com/josteist/Compadre/blob/master/extra/fig2.png)
 
 ### More complex model. 
-There are two in-built factors that can be included in any model,
+Each rate (speciation, extinction and sampling) can also be modelled as a function of drivers. A driver can either be an external time-series of putative influences (temperatur etc) or diversity dependence.
+
+When generating the model using make_BayesCMR, 
  ~time (add a random deviation from the overall rate to each transition)
  ~div  (add a diversity-dependent term. Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation
 
@@ -133,15 +134,12 @@ Overall rate				  0.14	  0.14	  0.14	  0.15	  0.00	316.56
 
 plot(fb)
 ```
-![Figure 3:](https://github.com/josteist/Compadre/tree/master/extra/fig3.png)
+![fig_fitfb](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
 
 Effective sample size is a rough measure of whether or not the chains have converged,
 i.e. if the parameters is estimated properly. A crude rule of thumb is
-that the ESS should be > 200 for all parameters.
-```
-hist(ESS(fb),21)
-# This model I would run even longer I suspect, to make sure it converges. Also
-```
+that the ESS should be > 200 for all parameters. ESS can be glanced from a summary for the main
+parameters, and evaluated for all (including the random effects for each interval) by using the function ESS(fit).
 
 Also note that the plot function outputs the sampled rates;
 ```
@@ -151,14 +149,17 @@ names(tmp)
 
 boxplot(t(tmp$SpecRates))
 ```
+![figboxp](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
 
-And you can also have normal y-axes for these plots by setting log=F (TRUE by default). 
+And you can also have normal y-axes for the internal rate-plots by setting log=F (TRUE by default). 
 Additionally the function can be fed with a data.frame of the intervals used, from which it
 extracts max_ma, min_ma (max and min age of interval) and $color. The GSA_timescale includes this
 ```
 plot(fb,log=F,stages=stages[do,])
 ```
-Note that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but
+![figcolors](https://github.com/josteist/Compadre/blob/master/extra/fig5.png)
+
+Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but
 speciation/extinction rates are for transitions, i.e. going from one interval
 to next (plotted ON the stage limits in grey).
 
@@ -187,7 +188,7 @@ fc <- MCMC_CMR(mc,niter=1e6)
 summary(fc)
 	 	 	=== Speciation rate parameters ===
        					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.14	  0.11	  0.14	  0.18	  0.00	103.17	
+Overall rate				 0.14	 0.11	 0.14	 0.18	 0.00	103.17	
 div					-0.45	-0.68	-0.45	-0.21	 0.00	38.37	
 d13C					3.8e-01	1.1e-01	3.7e-01	7.3e-01	2.1e-03	1.3e+02	
 
@@ -203,6 +204,8 @@ Overall rate				  0.131	  0.097	  0.129	  0.174	  0.000	148.828
 plot(fc) 
 
 ```
+![figlastmod](https://github.com/josteist/Compadre/blob/master/extra/fig6.png)
+
 The basic plot function outputs the estimated rates. plotDrivers outputs plots of the drivers, one figure for each rate (here I only include for speciation).
 ```
 plotDrivers(fc)
