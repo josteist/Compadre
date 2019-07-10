@@ -136,7 +136,7 @@ Overall rate				  0.14	  0.14	  0.14	  0.15	  0.00	316.56
 plot(fb)
 ```
 
-![fig_fitfb](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
+![fig fitfb](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
 
 Effective sample size is a rough measure of whether or not the chains have converged,
 i.e. if the parameters is estimated properly. A crude rule of thumb is
@@ -163,7 +163,7 @@ plot(fb,log=F,stages=stages[do,])
 
 Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but
 speciation/extinction rates are for transitions, i.e. going from one interval
-to next (plotted ON the stage limits in grey).
+to next (plotted ON the stage limits in grey). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
 
 ### A model including other drivers and diversity dependence
 Each rate is defined as a separate function/formula and can also have interactions (see below).
@@ -206,12 +206,16 @@ Overall rate				  0.131	  0.097	  0.129	  0.174	  0.000	148.828
 plot(fc) 
 
 ```
+
 ![figlastmod](https://github.com/josteist/Compadre/blob/master/extra/fig6.png)
 
 The basic plot function outputs the estimated rates. plotDrivers outputs plots of the drivers, one figure for each rate (here I only include for speciation).
 ```
 plotDrivers(fc)
 ```
+
+![figdriv1](https://github.com/josteist/Compadre/blob/master/extra/drivers1.png)
+![figdriv2](https://github.com/josteist/Compadre/blob/master/extra/drivers2.png)
 
 Here it seems like diversity has a negative
 impact on speciation rate, d13C a positive one. And perhaps a positive impact of
@@ -225,38 +229,34 @@ dim(fc$Chain)
 matplot(fc$Chain[,1:3],type="l")
 ```
 
+![figchains](https://github.com/josteist/Compadre/blob/master/extra/chains.png)
+
 If you want to know which parameter in the chain is which in the model then
 ```
 mc$inx # prints their indexes into the chain.
-plot(fc) #again, the actual rates.
-# prettier:
+$specInx
+(Intercept)         div        d13C 
+          1           4           5 
+
+$extInx
+(Intercept)    d180_cor 
+          2           6 
+
+$sampInx
+(Intercept) 
+          3 
+
+$varInx
+[1] 7 8 9
+
+$specReInx
+ [1] 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+
+$extReInx
+ [1] 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53
+
 plot(fc, stages = stages[do,])
 ```
+![figmodc](https://github.com/josteist/Compadre/blob/master/extra/fig6.png)
 
 
-# slightly simpler to show potential for estimating interactions:
-
-md <- make_BayesCMR(Obs,dts,
-                    spec =~time + div*d180_cor,
-                    ext  = ~time,
-                    samp = ~time,
-                    data = drivers)
-# So here we suspect that impact of diversity dependence is contingent on
-# corrected oxygen isotopes.
-fd <- MCMC_CMR(md,niter=1e6,nthin=100)
-# Most functions have help-pages
-?MCMC_CMR
-# Here I 'thin' the mcmc chain (i.e. store only every 100th sample) more than default.
-
-summary(fd)
-plot(fd)
-plotDrivers(fd)
-# So here the interpretation would be that there is a general diversity
-# dependence of the speciation rate (div parameter is negative, lower speciation rate
-# with higher diversities), and a positive impact of oxygen isotopes (temperature)
-# on speciation rate. However, there is also an interaction which is positive. That
-# means that when both temperature AND diversities are high the effect is positive,
-# i.e. impact of diversity dependence is strongest when d180 isotopes
-
-# NEED TO WORK ON INTERPRETATION OF INTERACTION. interactions are not
-# normalized, so they must be interpreted somehow....
