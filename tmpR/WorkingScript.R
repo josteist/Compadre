@@ -29,6 +29,7 @@ document()
 setwd("C:/Users/josteist/Documents/")
 install('Compadre')
 
+plot(fb,stages=stages[do,],log=F)
 
 library(Compadre)
 # Made a couple of changes, commit them now, push later
