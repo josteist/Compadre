@@ -51,7 +51,7 @@ colbottom(stages[do,]) # This simple function adds colors at the bottom, from th
 
 ```
 
-![raw_count] (https://github.com/josteist/Compadre/blob/master/extra/fig1.png)
+![raw_count](https://github.com/josteist/Compadre/blob/master/extra/fig1.png)
 
 ### Simple model
 A simple model with no temporal variability and no drivers. Essentially:
@@ -89,6 +89,7 @@ plots are just distributions of estimated mean rates.
 ```
 plot(fa)
 ```
+
 ![plorate 1](https://github.com/josteist/Compadre/blob/master/extra/fig2.png)
 
 ### More complex model. 
@@ -134,6 +135,7 @@ Overall rate				  0.14	  0.14	  0.14	  0.15	  0.00	316.56
 
 plot(fb)
 ```
+
 ![fig_fitfb](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
 
 Effective sample size is a rough measure of whether or not the chains have converged,
