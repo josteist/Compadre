@@ -66,7 +66,7 @@ colbottom(stages[do,])
 A simple model with no temporal variability and no drivers. Essentially:
 what is the man speciation, extinction and sampling rates across the Mesozoic?
 Any model is constructed by passing an obvervation matrix (taxa in rows, intervals in columns) with
-1 indicating the taxa was observed within each interval. Additionally we pass a vector of durations for the intervals (here dts).
+1 indicating the taxa was observed within each interval. Additionally we pass a vector of durations for the intervals (here dts). After a model is generated the function MCMC_CMR can be used to sample the Bayesian posterior. 
 
 ```
 # For reproducability.
@@ -105,18 +105,20 @@ Each rate (speciation, extinction and sampling) can also be modelled as a functi
 
 When generating the model using make_BayesCMR each rate can be defined by a formula `spec ~` ,`ext ~` and `samp ~`. 
 
-´ ~ time´ (add a random deviation from the overall rate to each transition)
-´ ~ div´  (add a diversity-dependent term. Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation
+` ~ time` (add a random deviation from the overall rate to each transition)
+` ~ div`  (add a diversity-dependent term. 
 
-More complex models take longer to estimate. Here speciation rates
-vary over time (they are not 'functions' of time as in + alpha*time, but this makes
-the model include a random effect per interval transition. )
+Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation. An intercept is included by default. Also note that all drivers, including diversity, are normalized so parameters reflect relative importance as drivers. Lastly, all rates are implemented and estimated on the log-scale
+
+More complex models take longer to estimate. Here speciation rates vary over time (they are not 'functions' of time as in + alpha*time, but this makes
+the model include a random effect per interval transition.)
 
 ```
 mb <- make_BayesCMR(Obs,dts,
                     spec = ~time)
 # Also you can call the model, and it will print out some basic info about it.
 mb
+
  == Compadre model == 
 Model includes  14912  taxa, spanning  23  intervals. 
 The model was generated Tue Jul 09 15:17:10 2019 and has 26 parameters.
@@ -162,20 +164,18 @@ boxplot(t(tmp$SpecRates))
 ```
 ![figboxp](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
 
-And you can also have normal y-axes for the internal rate-plots by setting log=F (TRUE by default). 
+And you can also have normal y-axes for the internal rate-plots by setting `log=F` (`TRUE` by default). 
 Additionally the function can be fed with a data.frame of the intervals used, from which it
-extracts max_ma, min_ma (max and min age of interval) and $color. The GSA_timescale includes this
+extracts `$max_ma`, `$min_ma` (max and min age of interval) and `$color`. The `GSA_timescale` includes this
 ```
 plot(fb,log=F,stages=stages[do,])
 ```
 ![figcolors](https://github.com/josteist/Compadre/blob/master/extra/fig5.png)
 
-Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but
-speciation/extinction rates are for transitions, i.e. going from one interval
-to next (plotted ON the stage limits in grey). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
+Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but speciation/extinction rates are for transitions, i.e. going from one interval to next (plotted ON the stage limits in grey). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
 
 ### A model including other drivers and diversity dependence
-Each rate is defined as a separate function/formula and can also have interactions (see below).
+Each rate is defined as a separate function/formula and can also have interactions.
 
 ```
 mc <- make_BayesCMR(Obs,dts,
@@ -184,16 +184,12 @@ mc <- make_BayesCMR(Obs,dts,
                     samp = ~ time,
                     data = drivers)
 ```
-The drivers are extracted from the data inputted, but 'div' and 'time' are internal to the package and no entry in the data is needed (and also, please
-avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so
-their relative importance is directly summarized by the estimated parameters. You could of course pack-transform if you're interested in the actual effect sizes.
-Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of
-speciation rate when d13C is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean(d13C)
+The drivers are extracted from the data inputted, but `div` and `time` are internal to the package and no entry in the data is needed (and also, please
+avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so their relative importance is directly summarized by the estimated parameters. You could of course pack-transform if you're interested in the actual effect sizes. Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of speciation rate when the driver is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean.
 
-Formulas are generic and also allows for interactions between the drivers.
-If you think that impact of diversity on speciation rates are more important 
-with higher d13C values, then spec = ~div*d13C will estimate impacts of both
-drivers and their interaction. 
+Formulas are generic and also allows for interactions between the drivers. If you think that impact of diversity on speciation rates are more important 
+with higher d13C values, then spec = ~div*d13C will estimate impacts of both drivers and their interaction. 
+
 ```
 fc <- MCMC_CMR(mc,niter=1e6)
 summary(fc)
@@ -218,7 +214,7 @@ plot(fc)
 
 ![figlastmod](https://github.com/josteist/Compadre/blob/master/extra/fig6.png)
 
-The basic plot function outputs the estimated rates. plotDrivers outputs plots of the drivers, one figure for each rate (here I only include for speciation).
+The basic plot function outputs the estimated rates. plotDrivers outputs plots of the drivers, one figure for each rate.
 ```
 plotDrivers(fc)
 ```
@@ -226,11 +222,11 @@ plotDrivers(fc)
 ![figdriv1](https://github.com/josteist/Compadre/blob/master/extra/drivers1.png)
 ![figdriv2](https://github.com/josteist/Compadre/blob/master/extra/drivers2.png)
 
-Here it seems like diversity has a negative
-impact on speciation rate, d13C a positive one. And perhaps a positive impact of
-d180_cor on extinctions rate, but most likely not significant (or rather the 
-credibility interval includes 0). Also note that the effective sample size for d13C is rather low, so here I would re-run with more iterations. 
-You can also plot the chains to inspect. 
+Here it seems like diversity has a negative impact on speciation rate, `d13C` a positive one. And perhaps a positive impact of `d180_cor` on extinctions rate, but most likely not significant (or rather the credibility interval includes 0). Also note that the effective sample size for `d13C` is rather low, so here I would re-run with more iterations. 
+
+#### Inspecting the MCMC-chain
+
+You can also plot the chains to check for convergence. Large models might require relatively long runs, particularly with many drivers.
 ```
 dim(fc$Chain)
 # 100000 samples of 95 parameters
@@ -264,8 +260,10 @@ $specReInx
 $extReInx
  [1] 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53
 
-plot(fc, stages = stages[do,])
-```
-![figmodc](https://github.com/josteist/Compadre/blob/master/extra/fig6.png)
 
+```
+
+
+## In development.
+This package is not entirely finished yet, but most functionality should be there. If you experience troubles, have tips or comments, feel free to contact me. 
 
