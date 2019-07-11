@@ -86,7 +86,7 @@ Overall rate				  0.18	  0.17	  0.18	  0.18	  0.00	407.44
        					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
 Overall rate				  0.15	  0.14	  0.15	  0.15	  0.00	414.58	
 ```
-Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course extremely potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
+Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
 
 #### Plotting
 Plot the rates. For models with no temporal variability and no drivers,
