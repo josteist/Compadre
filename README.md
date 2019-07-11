@@ -63,10 +63,7 @@ colbottom(stages[do,])
 ![raw_count](https://github.com/josteist/Compadre/blob/master/extra/fig1.png)
 
 ### Simple model
-A simple model with no temporal variability and no drivers. Essentially:
-what is the man speciation, extinction and sampling rates across the Mesozoic?
-Any model is constructed by passing an obvervation matrix (taxa in rows, intervals in columns) with
-1 indicating the taxa was observed within each interval. Additionally we pass a vector of durations for the intervals (here dts). After a model is generated the function MCMC_CMR can be used to sample the Bayesian posterior. 
+A simple model with no temporal variability and no drivers. Essentially: what is the mean speciation, extinction and sampling rates for Triassic/Jurassic? Any model is constructed by passing an obvervation matrix (taxa in rows, intervals in columns) with 1 indicating the taxa was observed within each interval. Additionally we pass a vector of durations for the intervals (here dts). After a model is generated the function MCMC_CMR can be used to sample the Bayesian posterior. 
 
 ```
 # For reproducability.
