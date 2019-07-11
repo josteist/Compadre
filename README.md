@@ -1,9 +1,7 @@
 
---> COPY IN THE R-OUTPUT AND FIGURES.
-
 ## Compadre - package to estimate drivers and diversification rates.
 
-The Compadre package allows for the estimation of rates of speciation, extinction and sampling using data from the fossil record. The approach is based on capture-mark-recapture techniques with additions to include potential drivers of rates of diversification, including diversity dependence. Definition of models occur by way of formulas and parameter estimation is Bayesian with internal functions to sample the model. Functions to plot rates and drivers are also included. In addition four abiotic drivers (d180 and d13C isotopes, sea level and continental fragmentation) is included as well as a large dataset of invertebrate fossils from the Phanerozoic.
+The Compadre package allows for the estimation of rates of speciation/origination, extinction and sampling using data from the fossil record. The approach is based on capture-mark-recapture techniques with additions to include potential drivers of rates of diversification, including diversity dependence. Definition of models occur by way of formulas and parameter estimation is Bayesian with internal functions to sample the model. Functions to plot rates and drivers are also included. The package also contains a selection of stage-level potential macroevolutionary drivers and a large dataset of Phanerozoic invertebrates downloaded from Paleobiology database.
 
 ## Installation
 Download and install package from github, requires devtools
@@ -15,28 +13,37 @@ library(Compadre)
 
 Compadre requires a couple of other packages (coda, mvtnorm etc), but you'll figure it out.
 
-## Making a model.
+## Using Compadre
 
-The basic input to a model is a matrix of 0/1 for observed lineages over intervals and
-a vector of temporal durations of these intervals. For each rate (speciation, extinction,
-and sampling) one can feed the model-generating function with basic formulas in R. First
-a simple example: Diversification during the Jurassic & Cretaceous.
+The basic input to a model is a matrix of 0/1 for observed taxa over intervals and a vector of temporal durations of these intervals. For each rate (speciation, extinction, and sampling) one can feed the model-generating function with basic formulas in R. Fossil matrices can easily be generates from [Paleobiology database](https://paleobiodb.org/), [NOW](http://www.helsinki.fi/science/now/ "NOW database") or other sources. 
 
-Extract the geological stages from the in-package timescale (GSA_timescale) and invertebrate fossil database (InvertPBDB). Drivers are extracted from data.frame Proxies.
+First a simple example on diversification during the Jurassic & Cretaceous.
+
+Extract the geological stages from the in-package timescale (´GSA_timescale´) and invertebrate fossil database (´InvertPBDB´). Drivers are extracted from data.frame Proxies.
 ```
-stages = GSA_timescale[GSA_timescale$scale_level==5,] #GSA_timescale is internal to the package. scale_level 5 is stages. Identical to timescale used by PBDB
-do = seq(45,23,by=-1) # Which intervals to use. 100 is Fortunian (first cambrian stage) 1 is Holocene
+# GSA_timescale is internal to the package. scale_level 5 is stages. Identical to timescale used by PBDB
+stages = GSA_timescale[GSA_timescale$scale_level==5,] 
+
+# Which intervals to use. 100 is Fortunian (first cambrian stage) 1 is Holocene
 # Doing intervals indexed 45 through 23, Jurassic/Cretaceous
-drivers <- Proxies[do,] # Picking out the drivers for this example. All drivers are in object 'Proxies' internal to the package.
-dts = stages[do,]$max_ma-stages[do,]$min_ma # Getting the durations of the intervals
-names(dts) <- stages[do,]$interval_name # Naming the durations.
-Obs = (1*(InvertPBDB>0))[,do] # Extracting the species level invert data to relevant times. InvertPBDB is the big matrix included in the package.
-Obs <- Obs[which(rowSums(Obs)>0),] #Removing the ones not observed in the Mesozoic
+do = seq(45,23,by=-1) 
+
+# Picking out the drivers for this example. All drivers are in object 'Proxies' internal to the package.
+drivers <- Proxies[do,] 
+
+# Getting the durations of the intervals
+dts = stages[do,]$max_ma-stages[do,]$min_ma 
+
+# Extracting the species level invert data to relevant times. InvertPBDB is the big matrix included in the package.
+Obs = (1*(InvertPBDB>0))[,do] 
+# Removing the ones not observed in the Mesozoic
+Obs <- Obs[which(rowSums(Obs)>0),] 
 ```
 
 There are 14912 species in this dataset.
 ```
 head(Obs) # Just to show the structure of the input.
+
                            Hettangian Sinemurian Pliensbachian Toarcian Aalenian Bajocian
 Aviculopecten occidentalis          0          0             0        0        0        0
 Pleuromya uniformis                 0          1             1        1        1        1
@@ -45,9 +52,11 @@ Pinna (Pinna) lanceolata            0          0             0        0        0
 Goniomya literata                   0          0             0        1        0        0
 Idonearca capax                     0          0             0        0        0        0
 
+
 plot(max(stages[do,]$max_ma)-cumsum(dts),colSums(Obs>0),type="o",ylab='# species',xlab='Ma',
      xlim=(rev(range(max(stages[do,]$max_ma)-cumsum(dts)))))
-colbottom(stages[do,]) # This simple function adds colors at the bottom, from the stages data.frame
+colbottom(stages[do,]) 
+# This simple function adds colors at the bottom, from the stages data.frame
 
 ```
 
@@ -80,8 +89,7 @@ Overall rate				  0.18	  0.17	  0.18	  0.18	  0.00	407.44
        					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
 Overall rate				  0.15	  0.14	  0.15	  0.15	  0.00	414.58	
 ```
-Not surprisingly the rates are very similar. However, mean rates over many transitions are of course extremely course measures of diversification.
-The last two columns are probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain)
+Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course extremely potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
 
 #### Plotting
 Plot the rates. For models with no temporal variability and no drivers,
@@ -93,11 +101,12 @@ plot(fa)
 ![plorate 1](https://github.com/josteist/Compadre/blob/master/extra/fig2.png)
 
 ### More complex model. 
-Each rate (speciation, extinction and sampling) can also be modelled as a function of drivers. A driver can either be an external time-series of putative influences (temperatur etc) or diversity dependence.
+Each rate (speciation, extinction and sampling) can also be modelled as a function of drivers. A driver can either be an external time-series of putative influences (temperature, sea level etc) or diversity dependence.
 
-When generating the model using make_BayesCMR, 
- ~time (add a random deviation from the overall rate to each transition)
- ~div  (add a diversity-dependent term. Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation
+When generating the model using make_BayesCMR each rate can be defined by a formula ´spec ~´ ,´ext ~´ and ´samp ~´. 
+
+´ ~ time´ (add a random deviation from the overall rate to each transition)
+´ ~ div´  (add a diversity-dependent term. Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation
 
 More complex models take longer to estimate. Here speciation rates
 vary over time (they are not 'functions' of time as in + alpha*time, but this makes
