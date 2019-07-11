@@ -19,7 +19,7 @@ The basic input to a model is a matrix of 0/1 for observed taxa over intervals a
 
 First a simple example on diversification during the Jurassic & Cretaceous.
 
-Extract the geological stages from the in-package timescale (´GSA_timescale´) and invertebrate fossil database (´InvertPBDB´). Drivers are extracted from data.frame Proxies.
+Extract the geological stages from the in-package timescale (`GSA_timescale`) and invertebrate fossil database (`InvertPBDB`). Drivers are extracted from data.frame `Proxies`.
 ```
 # GSA_timescale is internal to the package. scale_level 5 is stages. Identical to timescale used by PBDB
 stages = GSA_timescale[GSA_timescale$scale_level==5,] 
@@ -103,7 +103,7 @@ plot(fa)
 ### More complex model. 
 Each rate (speciation, extinction and sampling) can also be modelled as a function of drivers. A driver can either be an external time-series of putative influences (temperature, sea level etc) or diversity dependence.
 
-When generating the model using make_BayesCMR each rate can be defined by a formula ´spec ~´ ,´ext ~´ and ´samp ~´. 
+When generating the model using make_BayesCMR each rate can be defined by a formula `spec ~` ,`ext ~` and `samp ~`. 
 
 ´ ~ time´ (add a random deviation from the overall rate to each transition)
 ´ ~ div´  (add a diversity-dependent term. Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation
