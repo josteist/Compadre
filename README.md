@@ -15,7 +15,7 @@ Compadre requires a couple of other packages (coda, mvtnorm etc), but you'll fig
 
 ## Using Compadre
 
-The basic input to a model is a matrix of 0/1 for observed taxa over intervals and a vector of temporal durations of these intervals. For each rate (speciation, extinction, and sampling) one can feed the model-generating function with basic formulas in R. Fossil matrices can easily be generates from [Paleobiology database](https://paleobiodb.org/), [NOW](http://www.helsinki.fi/science/now/ "NOW database") or other sources. 
+The basic input to a model is a matrix of 0/1 for observed taxa over intervals and a vector of temporal durations of these intervals. For each rate (speciation, extinction, and sampling) one can feed the model-generating function with basic formulas in R. Fossil matrices can easily be generated from [Paleobiology database](https://paleobiodb.org/), [NOW](http://www.helsinki.fi/science/now/ "NOW database") or other sources. 
 
 First a simple example on diversification during the Jurassic & Cretaceous.
 
@@ -86,7 +86,7 @@ Overall rate				  0.18	  0.17	  0.18	  0.18	  0.00	407.44
        					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
 Overall rate				  0.15	  0.14	  0.15	  0.15	  0.00	414.58	
 ```
-Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course extremely potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
+Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
 
 #### Plotting
 Plot the rates. For models with no temporal variability and no drivers,
@@ -105,7 +105,7 @@ When generating the model using make_BayesCMR each rate can be defined by a form
 ` ~ time` (add a random deviation from the overall rate to each transition)
 ` ~ div`  (add a diversity-dependent term. 
 
-Diversity is roughly estimated as # obs / sampling prob). Doesn't work for sampling rates, which are used for diversity estimation. An intercept is included by default. Also note that all drivers, including diversity, are normalized so parameters reflect relative importance as drivers. Lastly, all rates are implemented and estimated on the log-scale
+Diversity is roughly estimated as # obs / sampling prob. Diversity can not impact, sampling rates, which are used for diversity estimation. An intercept for each rate is included by default. Also note that all drivers, including diversity, are normalized so parameters reflect relative importance as drivers. Lastly, all rates are implemented and estimated on the log-scale
 
 More complex models take longer to estimate. Here speciation rates vary over time (they are not 'functions' of time as in + alpha*time, but this makes
 the model include a random effect per interval transition.)
@@ -159,7 +159,7 @@ names(tmp)
 
 boxplot(t(tmp$SpecRates))
 ```
-![figboxp](https://github.com/josteist/Compadre/blob/master/extra/fig3.png)
+![figboxp](https://github.com/josteist/Compadre/blob/master/extra/fig4.png)
 
 And you can also have normal y-axes for the internal rate-plots by setting `log=F` (`TRUE` by default). 
 Additionally the function can be fed with a data.frame of the intervals used, from which it
@@ -169,7 +169,7 @@ plot(fb,log=F,stages=stages[do,])
 ```
 ![figcolors](https://github.com/josteist/Compadre/blob/master/extra/fig5.png)
 
-Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals, but speciation/extinction rates are for transitions, i.e. going from one interval to next (plotted ON the stage limits in grey). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
+Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals (plotted inside intervals), but speciation/extinction rates are for transitions (plotted ON the interval limits). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
 
 ### A model including other drivers and diversity dependence
 Each rate is defined as a separate function/formula and can also have interactions.
@@ -181,11 +181,11 @@ mc <- make_BayesCMR(Obs,dts,
                     samp = ~ time,
                     data = drivers)
 ```
-The drivers are extracted from the data inputted, but `div` and `time` are internal to the package and no entry in the data is needed (and also, please
-avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so their relative importance is directly summarized by the estimated parameters. You could of course pack-transform if you're interested in the actual effect sizes. Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of speciation rate when the driver is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean.
+The drivers are extracted from the `data` inputted, but `div` and `time` are internal to the package and no entry in the data is needed (and also, please
+avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so their relative importance is directly summarized by the estimated parameters. You could of course back-transform if you're interested in the actual effect sizes. Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of speciation rate when the driver is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean.
 
 Formulas are generic and also allows for interactions between the drivers. If you think that impact of diversity on speciation rates are more important 
-with higher d13C values, then spec = ~div*d13C will estimate impacts of both drivers and their interaction. 
+with higher d13C values, then `spec = ~div*d13C` will estimate impacts of both drivers and their interaction. 
 
 ```
 fc <- MCMC_CMR(mc,niter=1e6)
@@ -225,8 +225,6 @@ Here it seems like diversity has a negative impact on speciation rate, `d13C` a 
 
 You can also plot the chains to check for convergence. Large models might require relatively long runs, particularly with many drivers.
 ```
-dim(fc$Chain)
-# 100000 samples of 95 parameters
 # First three are the 'mean' rates:
 matplot(fc$Chain[,1:3],type="l")
 ```
@@ -257,8 +255,11 @@ $specReInx
 $extReInx
  [1] 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53
 
+$sampReInx
+ [1] 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74
 
 ```
+So the samples for the `d18_cor` impact on extinction rate is in `fc$Chain[,6]`. `varInx` are indexes for the standard deviations of the random effects for speciation, extinction and sampling (here 7,8 and 9). `**ReInx` are the indexes for the random effects.
 
 
 ## In development.
