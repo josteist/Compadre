@@ -26,7 +26,7 @@ m1 <- make_BayesCMR(Obs1,dts,spec=~div,      ext=~d13C,   samp=~1,data=drivers)
 m2 <- make_BayesCMR(Obs2,dts,spec=~d13C*div,   ext=~1,      samp=~SeaLev,data=drivers)
 m12 <- make_BayesCMR_2clades(Obs1,Obs2,dts = dts,
                              spec1 = ~div1+div2,   ext1 = ~div1+div2,samp1 = ~1,
-                             spec2 = ~div1+div2 ,  ext2 = ~div1+div2,samp2 = ~1,data=drivers)
+                             spec2 = ~div2*SeaLev ,  ext2 = ~div1+div2,samp2 = ~1,data=drivers)
 
 x = runif(m12$npar,min=-1.5,max=-1.4)
 sum(m1$probfun(x[seq(1,max(unlist(m12$inx$inx1)))]),
@@ -38,7 +38,7 @@ m12$probfun(x)
 
 f1 <- MCMC_CMR(m1,niter=1e5)
 f2 <- MCMC_CMR(m2,niter=1e5)
-f12 <- MCMC_CMR(m12,niter=1e4)
+f12 <- MCMC_CMR(m12,niter=1e5)
 # ,x0=c(runif(6,min=-1.8,max=-1.5),
 #                          rep(0,m12$npar-6)),niter=2e4)
 

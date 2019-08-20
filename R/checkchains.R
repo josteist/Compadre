@@ -14,14 +14,14 @@ checkchains <- function(cmrfit){
     brks <- seq(floor(min(esstmp/10))*10,ceiling(max(esstmp)/10)*10,length.out=10)
     par(mfrow=c(2,2))
     # cls = c('black','red','green','lightblue')
-
+    cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),1:3],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='')
-    if (length(unlist(m1$Model$inx[1:3]))>3){
+    if (length(unlist(cmrfit$Model$inx[1:3]))>3){
       # if any drivers
-    matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx[1:3])),1:3)],type="l",lty=1,
-            col = c(rep(cls[1],length(cmrfit$Model$inx$specInx)-1),
-                    rep(cls[2],  length(cmrfit$Model$inx$extInx)-1),
-                    rep(cls[3],  length(cmrfit$Model$inx$sampInx)-1)),ylab='drivers',xlab='iteration')
+      matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx[1:3])),1:3)],type="l",lty=1,
+              col = c(rep(cls[1],length(cmrfit$Model$inx$specInx)-1),
+                      rep(cls[2],  length(cmrfit$Model$inx$extInx)-1),
+                      rep(cls[3],  length(cmrfit$Model$inx$sampInx)-1)),ylab='drivers',xlab='iteration')
     } else {
       plot.new()
     }
@@ -35,7 +35,7 @@ checkchains <- function(cmrfit){
     plot.new()
     legend("topright",c('Means','Drivers','REs'),fill=cls)
 
-      } else {
+  } else {
     # two clade model
     # 8 panels?
     # Well, perhaps 6: histogram (all, color means, color drivers, color RE's for clades indep
@@ -44,14 +44,14 @@ checkchains <- function(cmrfit){
     brks <- seq(floor(min(esstmp/10))*10,ceiling(max(esstmp)/10)*10,length.out=10)
     par(mfrow=c(2,3))
     # cls = c('black','red','green','lightblue')
-
+    cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),1:3],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='clade 1')
-    if (length(unlist(m1$Model$inx1$inx[1:3]))>3){
+    if (length(unlist(cmrfit$Model$inx$inx1[1:3]))>3){
       # if any drivers
       matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx1[1:3])),1:3)],type="l",lty=1,
-            col = c(rep(cls[1],length(cmrfit$Model$inx$inx1$specInx)-1),
-                    rep(cls[2],  length(cmrfit$Model$inx$inx1$extInx)-1),
-                    rep(cls[3],  length(cmrfit$Model$inx$inx1$sampInx)-1)),ylab='drivers',xlab='iteration')
+              col = c(rep(cls[1],length(cmrfit$Model$inx$inx1$specInx)-1),
+                      rep(cls[2],  length(cmrfit$Model$inx$inx1$extInx)-1),
+                      rep(cls[3],  length(cmrfit$Model$inx$inx1$sampInx)-1)),ylab='drivers',xlab='iteration')
     } else {
       plot.new()
     }
@@ -70,13 +70,13 @@ checkchains <- function(cmrfit){
     cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))
 
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),min(unlist(cmrfit$Model$inx$inx2))+c(0:2)],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='clade 2')
-    if (length(unlist(m1$Model$inx2$inx[1:3]))>3){
+    if (length(unlist(cmrfit$Model$inx$inx2[1:3]))>3){
       # if any drivers
 
-    matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx2[1:3])),min(unlist(cmrfit$Model$inx$inx2))+c(0:2))],type="l",lty=1,
-            col = c(rep(cls[1],length(cmrfit$Model$inx$inx2$specInx)-1),
-                    rep(cls[2],  length(cmrfit$Model$inx$inx2$extInx)-1),
-                    rep(cls[3],  length(cmrfit$Model$inx$inx2$sampInx)-1)),ylab='drivers',xlab='iteration')
+      matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx2[1:3])),min(unlist(cmrfit$Model$inx$inx2))+c(0:2))],type="l",lty=1,
+              col = c(rep(cls[1],length(cmrfit$Model$inx$inx2$specInx)-1),
+                      rep(cls[2],  length(cmrfit$Model$inx$inx2$extInx)-1),
+                      rep(cls[3],  length(cmrfit$Model$inx$inx2$sampInx)-1)),ylab='drivers',xlab='iteration')
     } else {
       plot.new();
     }
@@ -89,5 +89,5 @@ checkchains <- function(cmrfit){
     hist(esstmp[min(unlist(cmrfit$Model$inx$inx2))+c(0:2)],breaks=brks,col=cls[1],add = TRUE)
     legend("topright",c('Means','Drivers','REs'),fill=cls)
 
-    }
+  }
 }
