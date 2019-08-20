@@ -41,6 +41,14 @@ f2 <- MCMC_CMR(m2,niter=1e5)
 f12 <- MCMC_CMR(m12,niter=1e4)
 # ,x0=c(runif(6,min=-1.8,max=-1.5),
 #                          rep(0,m12$npar-6)),niter=2e4)
+
+
+m12 <- make_BayesCMR_2clades(Obs1,Obs2,dts = dts,
+                             spec1 = ~1,   ext1 = ~1,samp1 = ~1,
+                             spec2 = ~1 ,  ext2 = ~1,samp2 = ~1,data=drivers)
+f12 <- MCMC_CMR(m12,niter=1e4)
+
+
 par(mfcol=c(2,2))
 matplot(f1$Chain,type="l")
 matplot(f2$Chain,type="l")

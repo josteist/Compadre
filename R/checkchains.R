@@ -16,10 +16,15 @@ checkchains <- function(cmrfit){
     # cls = c('black','red','green','lightblue')
 
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),1:3],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='')
+    if (length(unlist(m1$Model$inx[1:3]))>3){
+      # if any drivers
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx[1:3])),1:3)],type="l",lty=1,
             col = c(rep(cls[1],length(cmrfit$Model$inx$specInx)-1),
                     rep(cls[2],  length(cmrfit$Model$inx$extInx)-1),
                     rep(cls[3],  length(cmrfit$Model$inx$sampInx)-1)),ylab='drivers',xlab='iteration')
+    } else {
+      plot.new()
+    }
     cls = c(rgb(200/255,  20/255, 20/255,1),
             rgb( 20/255, 200/255, 20/255,1),
             rgb( 20/255,  20/255,200/255,1))
@@ -41,10 +46,15 @@ checkchains <- function(cmrfit){
     # cls = c('black','red','green','lightblue')
 
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),1:3],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='clade 1')
-    matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx1[1:3])),1:3)],type="l",lty=1,
+    if (length(unlist(m1$Model$inx1$inx[1:3]))>3){
+      # if any drivers
+      matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx1[1:3])),1:3)],type="l",lty=1,
             col = c(rep(cls[1],length(cmrfit$Model$inx$inx1$specInx)-1),
                     rep(cls[2],  length(cmrfit$Model$inx$inx1$extInx)-1),
                     rep(cls[3],  length(cmrfit$Model$inx$inx1$sampInx)-1)),ylab='drivers',xlab='iteration')
+    } else {
+      plot.new()
+    }
     cls = c(rgb(200/255,  20/255, 20/255,1),
             rgb( 20/255, 200/255, 20/255,1),
             rgb( 20/255,  20/255,200/255,1))
@@ -60,10 +70,16 @@ checkchains <- function(cmrfit){
     cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))
 
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),min(unlist(cmrfit$Model$inx$inx2))+c(0:2)],type="l",col = cls,lty=1,xlab='iteration',ylab='means',main='clade 2')
+    if (length(unlist(m1$Model$inx2$inx[1:3]))>3){
+      # if any drivers
+
     matplot(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),setdiff(c(unlist(cmrfit$Model$inx$inx2[1:3])),min(unlist(cmrfit$Model$inx$inx2))+c(0:2))],type="l",lty=1,
             col = c(rep(cls[1],length(cmrfit$Model$inx$inx2$specInx)-1),
                     rep(cls[2],  length(cmrfit$Model$inx$inx2$extInx)-1),
                     rep(cls[3],  length(cmrfit$Model$inx$inx2$sampInx)-1)),ylab='drivers',xlab='iteration')
+    } else {
+      plot.new();
+    }
     cls = c(rgb(200/255,  20/255, 20/255,1),
             rgb( 20/255, 200/255, 20/255,1),
             rgb( 20/255,  20/255,200/255,1))
