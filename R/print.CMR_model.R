@@ -1,6 +1,6 @@
 #' @export
 print.CMR_model <- function(mod){
-  if (is.null(mod$clade1inx)){
+  if (is.null(mod$Clade1Mod)){
     cat(' == Compadre model == \n')
     cat('Model includes ',dim(mod$Obs)[1],' taxa,')
     cat(' spanning ',dim(mod$Obs)[2],' intervals. \n')
@@ -15,29 +15,26 @@ print.CMR_model <- function(mod){
       cat('Sampling',as.character(mod$samp),'\n')
 
 
-      # cat('Speciation rate: ',length(mod$aix$Covar_Speciation),'external driver(s)\n')
-      # cat('Extinction rate: ',length(mod$aix$Covar_Extinction),'external driver(s)\n')
-      # cat('Sampling rate:   ',length(mod$aix$Covar_Sampling),'external driver(s)\n')
-      # cat('Diversity dependence is',ifelse(length(mod$aix$DivDep_Speciation)>0,'ON','OFF'),'for speciation ')
-      # cat('and',ifelse(length(mod$aix$DivDep_Extinction)>0,'ON','OFF'),'for extinction rates.\n')
-      # cat(c('','Drivers interact with diversity impacting speciation rates.\n')[1+(length(mod$aix$`Interaction Spec:driver*diversity`)>0)*1])
-      # cat(c('','Drivers interact with diversity impacting extinction rates.\n')[1+(length(mod$aix$`Interaction Ext:driver*diversity`)>0)*1])
-
     cat('\n')
-    # if (sum(sapply(mod$reix,length)>0)==3){
-    #   cat('All rates vary over time.')
-    # } else if (sum(sapply(mod$reix,length)>0)==2){
-    #   cat(c('Speciation','Extinction','Sampling')[which(sapply(mod$reix,length)>0)[1]],' and ',
-    #       c('speciation','extinction','sampling')[which(sapply(mod$reix,length)>0)[2]],' rates vary over time.')
-    # } else if (sum(sapply(mod$reix,length)>0)==1){
-    #   cat(c('Speciation','Extinction','Sampling')[min(which(sapply(m1$reix,length)>0))],' rates vary over time.')
-    # } else {
-    #   cat('\n')
-    #   cat('No rates vary over time (i.e. have random terms).')
-    # }
   } else {
-    cat(c('This is a model of interacting clades'))
-  }
+    cat(' == Compadre model of interacting clades == \n')
+    cat('Model includes',dim(mod$Clade1Mod$Obs)[1],'taxa in clade 1 and',dim(mod$Clade2Mod$Obs)[1],'in clade 2,')
+    cat(' spanning ',dim(mod$Clade1Mod$Obs)[2],' intervals. \n')
+    cat('The model was generated',mod$date)
+    cat(' and has', mod$npar,'parameters.\n')
+    cat('\n')
+
+    # If only 1 clade model
+    cat(' ==  Model terms  == \n')
+    cat('Speciation clade 1',as.character(mod$Clade1Mod$spec),'\n')
+    cat('Extinction clade 1',as.character(mod$Clade1Mod$ext),'\n')
+    cat('Sampling clade 1',as.character(mod$Clade1Mod$samp),'\n')
+    cat('\n')
+    cat('Speciation clade 2',as.character(mod$Clade2Mod$spec),'\n')
+    cat('Extinction clade 2',as.character(mod$Clade2Mod$ext),'\n')
+    cat('Sampling clade 2',as.character(mod$Clade2Mod$samp),'\n')
+
+      }
 
 }
 

@@ -23,7 +23,7 @@
 # div is own diversity. ^2 doesn't seem to work and must be submitted as sep col in data.
 # Here I think we should have DATA with nrow = length(dts), even though the last one is ONLY used for drivers
 # of sampling rates.
-make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
+make_BayesCMR_old <- function(Obs,dts=rep(1,dim(Obs)[2]),
                               spec =  ~ 1,
                               ext  =  ~ 1,
                               samp =  ~ 1,
@@ -181,17 +181,15 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   # are BEfore variances in the x-array.
   alphinx= list();
   alphinx$specInx   = c(1,seq(4,        length.out=(dim(mmspec)[2]-1)))
-  alphinx$extInx    = c(2,seq(max(c(3,alphinx$specInx))+1,length.out=(dim(mmext)[2]-1)))
-  alphinx$sampInx   = c(3,seq(max(c(3,alphinx$specInx,alphinx$extInx))+1,length.out=(dim(mmsamp)[2]-1)))
-
-
+  alphinx$extInx    = c(2,seq(max(c(3,alphinx[[1]]))+1,length.out=(dim(mmext)[2]-1)))
+  alphinx$sampInx   = c(3,seq(max(c(3,alphinx[[2]]))+1,length.out=(dim(mmsamp)[2]-1)))
   alphinx$varInx    = seq(max(unlist(alphinx)+1),length.out=sum(RE))
   alphinx$specReInx = seq(max(unlist(alphinx)+1),length.out=RE[1]*(length(dts)-1))
   alphinx$extReInx  = seq(max(unlist(alphinx)+1),length.out=RE[2]*(length(dts)-1))
   alphinx$sampReInx = seq(max(unlist(alphinx)+1),length.out=RE[3]*(length(dts)-2))
 
   names(alphinx$specInx) <- colnames(mmspec)
-  names(alphinx$extInx)  <- colnames(mmext)
+  names(alphinx$extInx) <- colnames(mmext)
   names(alphinx$sampInx) <- colnames(mmsamp)
 
   npar <- dim(mmspec)[2] + dim(mmext)[2] + dim(mmsamp)[2] + sum(RE*1) + RE[1]*(length(dts)-1) + RE[2]*(length(dts)-1) + RE[3]*(length(dts)-2)
@@ -231,14 +229,14 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     } else {        # here with drivers
       if (updmmx[1]){
         # If div-dep, fill in with divers
-        # if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
+        if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
           lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx]))       }
-        #   # mmspec_f
-        # } else { # Is this needed? 080819? THe if statement above is always false. and
-        #   # there is an interaction term with diversity for speciation. Need to remake mmspec
-        #   lspecfun <- function(x){
-        #     return(rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx])))        }
-        # }
+          # mmspec_f
+        } else { # Is this needed? 080819? THe if statement above is always false. and
+          # there is an interaction term with diversity for speciation. Need to remake mmspec
+          lspecfun <- function(x){
+            return(rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx])))        }
+        }
       } else {
         lspecfun <- function(x){rowSums(cbind(mmspec %*% x[alphinx$specInx]))}
       }
@@ -248,13 +246,13 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
 
     if (updmmx[1]){
       # If div-dep, fill in with divers
-      # if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
+      if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
         lspecfun <- function(x){
           return(rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx])))        }
-      # } else {
-      #   # there is an interaction term with diversity for speciation. Need to remake mmspec
-      #   lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))        }
-      # }
+      } else {
+        # there is an interaction term with diversity for speciation. Need to remake mmspec
+        lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))        }
+      }
     } else {
       lspecfun <- function(x){rowSums(cbind(mmspec %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))}
     }

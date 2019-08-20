@@ -4,12 +4,9 @@
 \alias{make_BayesCMR_2clades}
 \title{Function to construct two clade CMR-model.}
 \usage{
-make_BayesCMR_2clades(Obs1, Obs2, dts = rep(1, dim(Obs1)[2]), RE = c(T,
-  T, T), DivDepSpecMatrix = matrix(rep(NA, 4), nrow = 2),
-  DivDepExtMatrix = matrix(rep(NA, 4), nrow = 2), SpecTS_1 = NULL,
-  ExtTS_1 = NULL, SmpTS_1 = NULL, SpecTS_2 = NULL, ExtTS_2 = NULL,
-  SmpTS_2 = NULL, Driv_x_Div_Spec_1 = NULL, Driv_x_Div_Ext_1 = NULL,
-  Driv_x_Div_Spec_2 = NULL, Driv_x_Div_Ext_2 = NULL, ...)
+make_BayesCMR_2clades(Obs1, Obs2, dts = rep(1, dim(Obs1)[2]),
+  spec1 = ~time, ext1 = ~time, samp1 = ~time, spec2 = ~time,
+  ext2 = ~time, samp2 = ~time, pfix = 2, data = NULL, ...)
 }
 \arguments{
 \item{Obs1}{observations clade 1: a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}

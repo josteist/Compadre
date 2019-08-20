@@ -7,13 +7,13 @@
 #' @param nthin sets the thinning, i.e. samples for each nthin iterations are stored as output. Defaults to 10.
 #' @param vmin sets the minimum and initial standard deviation of the normal proposals.
 #' @param draweps number of iterations between each update of the proposal covariance matrix. Defaults to niter/100
-#' @param x_init Potential initial values for the chain. Defaults to c(-4,-4,-4,rep(0,cmrModel$npar-3)).
+#' @param x_init Potential initial values for the chain. If not provided the initial mean rates are optimes using the probability density function and all other parameters set to 0.
 #' @param cvstp Covariance structure for proposal. This is tuned during burnin. Defaults to (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar))
 #' @param adapt Adapt the covariance proposals during first half?
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
 #'
-MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-4,
+MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-3,
                          draweps=niter/100,
                          x0=NULL,
                          cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
@@ -25,7 +25,7 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-4,
   # first half og the total niter [number of iterations.]
   # _v2 should store all samples for each block(draweps), and use the samples from the last block
   # only to update the cov. Then we need a temp_X which stores ALL samples for each block.
-  if (is.null(cmrModel$clade1inx)){
+  if (is.null(cmrModel$Clade1Mod)){
     # If this is null, then the model is for one clade only.
     if (is.null(x0)){
       # If no initial given, then optimize for main three parameters and use those as inits + only 0's
@@ -38,8 +38,11 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-4,
     if (is.null(x0)){
       # If no initial given, then optimize for main three parameters and use those as inits + only 0's
       # c(-2,-2.2,-2.1,rep(0,cmrModel$npar-3))
-      xtmp1<-optim(c(-1.1,-1.2,-1),function(x){-cmrModel$Clade1Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade1Mod$npar-3)))})$par
-      xtmp2<-optim(c(-1.1,-1.2,-1),function(x){-cmrModel$Clade2Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade2Mod$npar-3)))})$par
+      # Since we now can have drivers interacting the individual models wont work.
+      tmpm1 <- make_BayesCMR(cmrModel$Clade1Mod$Obs,cmrModel$Clade1Mod$dts)
+      tmpm2 <- make_BayesCMR(cmrModel$Clade2Mod$Obs,cmrModel$Clade2Mod$dts)
+      xtmp1<-optim(c(-1.1,-1.2,-1),function(x){-tmpm1$probfun(x)})$par
+      xtmp2<-optim(c(-1.1,-1.2,-1),function(x){-tmpm1$probfun(x)})$par #-cmrModel$Clade2Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade2Mod$npar-3)))})$par
 
       x0 = c(xtmp1,rep(0,cmrModel$Clade1Mod$npar-3),
              xtmp2,rep(0,cmrModel$Clade2Mod$npar-3),
@@ -86,7 +89,7 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-4,
       # diag(vmin,cmrModel$npar))
       # BELOW WAS COMMENTED OUT 110619 for testing setting the stepsize for main pars to /10 of others
       cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
-                                                 diag(vmin/100,cmrModel$npar))
+                                                 diag(vmin,cmrModel$npar))
 
 
 

@@ -4,7 +4,7 @@
 \alias{MCMC_CMR}
 \title{An adaptive Markov chain Monte Carlo sampler for estimating parameters of a CMR_model.}
 \usage{
-MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 1e-04,
+MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 0.001,
   draweps = niter/100, x0 = NULL,
   cvstp = (2.38/(sqrt(cmrModel$npar)))^2 * diag(vmin, cmrModel$npar),
   adapt = TRUE)
@@ -24,7 +24,7 @@ MCMC_CMR(cmrModel, niter = 10000, nthin = 10, vmin = 1e-04,
 
 \item{adapt}{Adapt the covariance proposals during first half?}
 
-\item{x_init}{Potential initial values for the chain. Defaults to c(-4,-4,-4,rep(0,cmrModel$npar-3)).}
+\item{x_init}{Potential initial values for the chain. If not provided the initial mean rates are optimes using the probability density function and all other parameters set to 0.}
 }
 \value{
 a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
