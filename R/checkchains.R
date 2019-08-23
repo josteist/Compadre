@@ -5,6 +5,9 @@
 
 
 checkchains <- function(cmrfit){
+  olp <- par(no.readonly = TRUE);
+  on.exit(par(olp))
+
   if (is.null(cmrfit$Model$Clade1Mod)){
     # if single clade model
     # Four panels:
@@ -40,6 +43,7 @@ checkchains <- function(cmrfit){
     # 8 panels?
     # Well, perhaps 6: histogram (all, color means, color drivers, color RE's for clades indep
     # then matplot of pars[1:3], then of all drivers for each model (color for which driver))
+    # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:dim(f1$Chain)[2]/2),])))
     esstmp <- ESS(cmrfit)
     brks <- seq(floor(min(esstmp/10))*10,ceiling(max(esstmp)/10)*10,length.out=10)
     par(mfrow=c(2,3))

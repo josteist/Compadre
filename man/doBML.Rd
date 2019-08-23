@@ -5,14 +5,12 @@
 \title{Function to approximate Bayesian model probability using importance sampling.
 The output logBML is approximating the Bayesian factor integral, and the support for one model over another, given the same data (i.e. the Bayes factor), can be approximated by exp(logBML[1] - logBML[2])}
 \usage{
-doBML(myf, chain, ndraws = 10000)
+doBML(cmrfit, ndraws = 10000)
 }
 \arguments{
-\item{myf}{a Bayesian proportional probability density function}
+\item{cmrfit}{A fit of a model using Compadre. The function extracts the Bayesian probability density function and uses the last half of the chain.}
 
-\item{chain}{a chain from an MCMC fit. Exclude burning before submitting.}
-
-\item{ndraws}{number of samples to use to approximate the bayesian model probability}
+\item{ndraws}{number of samples to use to approximate the Bayesian model probability}
 }
 \description{
 Function to approximate Bayesian model probability using importance sampling.

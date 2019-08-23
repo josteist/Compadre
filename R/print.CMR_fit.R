@@ -9,7 +9,7 @@ print.CMR_fit <- function(fit){
   cat('\n')
   cat('Size of chain:',dim(fit$Chain),'\n')
   cat('Type plot(fit) to plot estimated rates.')
-  cat('Type hist(ESS(fit)) to plot histogram of effective sample sizes.')
+  cat('Type hist(ESS(fit)) to plot histogram of effective sample sizes and checkchains(fit) to plot convergence diagnostics.')
 
 }
 # Making a 'name' for the model
