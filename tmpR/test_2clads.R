@@ -1,7 +1,7 @@
 # Two clade tests
-
+rm(list=ls())
 library(Compadre)
-do = seq(20,12,by=-1)
+do = seq(50,8,by=-1)
 # 90 to 8 is 'Phanerozoic'
 stages = GSA_timescale[GSA_timescale$scale_level==5,]
 
@@ -37,8 +37,10 @@ m12$probfun(x)
 # being wrongly indexes (and not counted). Think its fixed.
 
 f1 <- MCMC_CMR(m1,niter=5e4)
+
 f2 <- MCMC_CMR(m2,niter=1e5)
-f12 <- MCMC_CMR(m12,niter=1e5)
+x0 = optim(runif(m12$npar,min=-0.01,max=0.1),m12$probfun,control=list(maxit=1e4,fnscale=-1))
+f12 <- MCMC_CMR(m12,niter=1e5,draweps=5e2)
 
 f12a <- contMCMC_CMR(f12)
 # ,x0=c(runif(6,min=-1.8,max=-1.5),

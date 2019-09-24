@@ -23,22 +23,23 @@
 # div is own diversity. ^2 doesn't seem to work and must be submitted as sep col in data.
 # Here I think we should have DATA with nrow = length(dts), even though the last one is ONLY used for drivers
 # of sampling rates.
-make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
-                          spec =  ~ 1,
-                          ext  =  ~ 1,
-                          samp =  ~ 1,
-                          data = NULL,
-                          pfix=2,
-                          priorsNorm_Cov=c(0,2),
-                          priorsNorm_Mus = rep(list(c(-4,4)),3),
-                          priorsUnif=c(-3,3),replRE_1 = F){
+make_BayesCMR_adts <- function(Obs,dts=rep(1,dim(Obs)[2]),
+                              spec =  ~ 1,
+                              ext  =  ~ 1,
+                              samp =  ~ 1,
+                              data = NULL,
+                              pfix=2,
+                              priorsNorm_Cov=c(0,2),
+                              priorsNorm_Mus = rep(list(c(-4,4)),3),
+                              priorsUnif=c(-3,3),replRE_1 = F){
   # Model generating function for a Compadre analysis.
   # Minimum input is a matrix of observed/unobserved of dimensions
   # taxa by temporal interval. dts is vector of interval
   # durations (default sets to 1).
-
-  # Dts are in this version difference between mid-poitns of intervals for spec/ext and true dts for samp.
-  dts_se <- dts[-1]/2 + dts[-length(dts)]/2
+  #
+  # _adts uses an alternative parameterization of the interval durations, by
+  # assuming that the interval for growth (i.e. spec, ext) is the intervals themselves.
+  # and not the difference in midpoints.
 
   # Current version implements paraclade extinction and growth from Raup 1984
   # used to get seniority and extinction. Current version 26.03.2019
@@ -235,7 +236,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       if (updmmx[1]){
         # If div-dep, fill in with divers
         # if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
-        lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx]))       }
+          lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx]))       }
         #   # mmspec_f
         # } else { # Is this needed? 080819? THe if statement above is always false. and
         #   # there is an interaction term with diversity for speciation. Need to remake mmspec
@@ -252,8 +253,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     if (updmmx[1]){
       # If div-dep, fill in with divers
       # if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
-      lspecfun <- function(x){
-        return(rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx])))        }
+        lspecfun <- function(x){
+          return(rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx])))        }
       # } else {
       #   # there is an interaction term with diversity for speciation. Need to remake mmspec
       #   lspecfun <- function(x){rowSums(cbind(mmspec_f(x) %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))        }
@@ -298,15 +299,15 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     lfec = lspecfun(x);
     lext = lextfun(x);
     lsmp = lsampfun(x);
-    # _se
+
     ll <- pradel_unvd_gam(
       ext = sapply(1:(length(dts)-1),function(ii){
-        (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts_se[ii]))-1))/
-          (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts_se[ii])))-exp(lext[ii]))}),
+        (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii]))-1))/
+          (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii])))-exp(lext[ii]))}),
       gam <- sapply(1:(length(dts)-1),function(ii){
-        (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts_se[ii]))-1))/
-           (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts_se[ii])))-exp(lext[ii])))/
-          exp((exp(lfec[ii])-exp(lext[ii]))*dts_se[ii])}),
+        (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii]))-1))/
+           (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii])))-exp(lext[ii])))/
+          exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii])}),
       p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp[ii]),dts[ii])}),
       u,n,v,d);
     if (is.infinite(ll$LogL)){ll$LogL = -Inf};
@@ -317,11 +318,11 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   }
   inxDriv = seq(4,length.out=dim(mmspec)[2]+ dim(mmext)[2]+dim(mmsamp)[2]-3) # index into 'drivers' non intercepts.
   if (any(RE)){
-    prfun <- function(x){
-      c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
-        dunif(x[alphinx$varInx],min=priorsUnif[1],priorsUnif[2],log=T),
-        sapply(inxDriv,function(ii){dnorm(x[ii],priorsNorm_Cov[1],priorsNorm_Cov[2],log=T)}),
-        sapply(1:sum(RE),function(ii){dnorm(   x[alphinx[[4+which(RE)[ii]]]],0,exp(x[alphinx$varInx[ii]]),log=T)}))}
+  prfun <- function(x){
+    c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
+      dunif(x[alphinx$varInx],min=priorsUnif[1],priorsUnif[2],log=T),
+      sapply(inxDriv,function(ii){dnorm(x[ii],priorsNorm_Cov[1],priorsNorm_Cov[2],log=T)}),
+      sapply(1:sum(RE),function(ii){dnorm(   x[alphinx[[4+which(RE)[ii]]]],0,exp(x[alphinx$varInx[ii]]),log=T)}))}
   } else {
     prfun <- function(x){
       c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
@@ -336,8 +337,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
               n_est=n_est,n_norm=n_norm,Obs=Obs,dts=dts,
               date=date(),call=fullcall,
               mmsamp=mmsamp,mmspec=mmspec_f,mmext=mmext_f,spec = spec,ext = ext,samp=samp)
-  # Zsmp = Zsamp, Zspc = Zspec, Zext = Zext,dataSE = dataSE,
-  # inxDriv = inxDriv,RE = RE);
+              # Zsmp = Zsamp, Zspc = Zspec, Zext = Zext,dataSE = dataSE,
+              # inxDriv = inxDriv,RE = RE);
   attr(out,"class")<-"CMR_model"
   return(out)
 

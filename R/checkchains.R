@@ -14,7 +14,7 @@ checkchains <- function(cmrfit){
     # histogram of ESS for ALL rates (possibly with Re's in diff colors?)
     # then matplotchains for mean/drivers with ESS's written in plot?
     esstmp <- ESS(cmrfit)
-    brks <- seq(floor(min(esstmp/10))*10,ceiling(max(esstmp)/10)*10,length.out=10)
+    brks <- seq(floor(min(esstmp/10)-1)*10,ceiling(max(esstmp)/10+1)*10,length.out=21)
     par(mfrow=c(2,2))
     # cls = c('black','red','green','lightblue')
     cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))
@@ -36,7 +36,7 @@ checkchains <- function(cmrfit){
     hist(esstmp[c(unlist(cmrfit$Model$inx[1:3]))],breaks=brks,col=cls[2],add = TRUE)
     hist(esstmp[1:3],breaks=brks,col=cls[1],add = TRUE)
     plot.new()
-    legend("topright",c('Means','Drivers','REs'),fill=cls)
+    legend(x=c(0,1),y=c(0,1),c('Means','Drivers','REs'),fill=cls,bty=NULL,cex=0.8)
 
   } else {
     # two clade model
@@ -45,7 +45,7 @@ checkchains <- function(cmrfit){
     # then matplot of pars[1:3], then of all drivers for each model (color for which driver))
     # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:dim(f1$Chain)[2]/2),])))
     esstmp <- ESS(cmrfit)
-    brks <- seq(floor(min(esstmp/10))*10,ceiling(max(esstmp)/10)*10,length.out=10)
+    brks <- seq(floor(min(esstmp/10)-1)*10,ceiling(max(esstmp)/10+1)*10,length.out=21)
     par(mfrow=c(2,3))
     # cls = c('black','red','green','lightblue')
     cls = c(rgb(0,0,0,.5),   rgb( 1,0,0,.5),   rgb( 0,1,0,.5))

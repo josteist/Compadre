@@ -8,11 +8,12 @@ doBML <- function(cmrfit,ndraws=1e4){
   chain <- cmrfit$Chain
   thetas <- apply(chain,2,mean);
   vcv    <- cov(chain);
-  drws   <- rmvnorm(ndraws,mean=thetas,sigma=vcv);
+  # mvtnorm::rmvnorm(draweps,sigma=cvstp)
+  drws   <-  mvtnorm::rmvnorm(ndraws,mean=thetas,sigma=vcv);
   mbd  <- (sapply(1:dim(drws)[1],function(ii){myf(drws[ii,])}))
-  dmv  <- dmvnorm(drws,mean=thetas,sigma=vcv,log=T)
+  dmv  <-  mvtnorm::dmvnorm(drws,mean=thetas,sigma=vcv,log=T)
   mod_hat <- myf(thetas)
-  norm_hat <- dmvnorm(thetas,mean=thetas,sigma=vcv,log=T)
+  norm_hat <-  mvtnorm::dmvnorm(thetas,mean=thetas,sigma=vcv,log=T)
   logBML <- log(1/ndraws) + (-norm_hat+mod_hat) +
     log(sum(exp(mbd-mod_hat)/exp(dmv-norm_hat)))
 

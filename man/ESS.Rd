@@ -5,7 +5,7 @@
 \title{Function to extract effective sample sizes from a MCMC-CMR fit.
 Calculated by using effectiveSize from the package coda.}
 \usage{
-ESS(f1)
+ESS(cmrfit)
 }
 \arguments{
 \item{fit}{A fit from MCMC_CMR. Extracts samples from fit$Chain}

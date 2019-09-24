@@ -27,14 +27,14 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
 
       }
       # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:dim(f1$Chain)[2]/2),])))
-      # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:dim(cmrfit$Chain)[2]/2),])))
+      # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),])))
       writeLines(c(tmpnam,
                    ifelse(nchar(names(cmrfit$Model$inx$specInx)[[ii]])>7,"","\t"),
                    ifelse(nchar(names(cmrfit$Model$inx$specInx)[[ii]])>14,"","\t"),
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -62,7 +62,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -90,7 +90,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
   } else {
@@ -114,7 +114,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx1$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -132,7 +132,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx2$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -154,7 +154,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx1$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -172,7 +172,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx2$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -195,7 +195,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx1$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")
@@ -213,7 +213,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
                    format(c(mean(tmp),
                             quantile(tmp,c(0.025,0.5,0.975)),
                             sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:dim(cmrfit$Chain)[2]/2),cmrfit$Model$inx$inx2$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
+                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
       cat("\n")
     }
     cat("\n")

@@ -23,7 +23,7 @@
 # div is own diversity. ^2 doesn't seem to work and must be submitted as sep col in data.
 # Here I think we should have DATA with nrow = length(dts), even though the last one is ONLY used for drivers
 # of sampling rates.
-make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
+make_BayesCMR_dts <- function(Obs,dts=rep(1,dim(Obs)[2]),
                           spec =  ~ 1,
                           ext  =  ~ 1,
                           samp =  ~ 1,
@@ -36,17 +36,17 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   # Minimum input is a matrix of observed/unobserved of dimensions
   # taxa by temporal interval. dts is vector of interval
   # durations (default sets to 1).
-
+  
   # Dts are in this version difference between mid-poitns of intervals for spec/ext and true dts for samp.
   dts_se <- dts[-1]/2 + dts[-length(dts)]/2
-
+  
   # Current version implements paraclade extinction and growth from Raup 1984
   # used to get seniority and extinction. Current version 26.03.2019
-
+  
   # v3 tries to implement the rates in a different way. It seems like our 'fecundity' and speciation rate thining didn't work too well.
   ## INPUT CHECKS
   fullcall <- deparse(match.call());
-
+  
   if (length(dts) != dim(Obs)[2]){
     stop("Number of intervals in *dts* does not match dimension of Obs")
   }
@@ -73,8 +73,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     # then just two, and should be repeated
     nprs2 <- rep(list(priorsNorm_Mus),3)
   }
-
-
+  
+  
   #All normal priors are µ=0 and sd=10
   priun<- priorsUnif;# Obs is 1/0 observation matrix. dts is (possibly) a vector of time-durations of the intervals
   undv <- make_unvd(Obs);
@@ -83,11 +83,11 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   v = undv$v;
   n = undv$n;
   d = undv$d;
-
+  
   prior <- list(); #making all prior terms part of this list.
   prix = 1; # ticker for prior parts.
-
-
+  
+  
   origdata = data;
   # normalizing data
   ## TO DO: If last entry (stage) is included in the data.frame, must be removed from normalization!!!
@@ -124,8 +124,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     }
     updmmx[2] <- TRUE
   }
-
-
+  
+  
   if ("div" %in% (attr(terms(samp),"term.labels"))){
     # This is not possible... we can not have diversity estimated affecting the 'diversity' itself. Throw error
     error('Model with diversity impact on sampling is not possible.')
@@ -145,8 +145,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     return(model.matrix(tmpext,tmp))}
   tmpsamp <- update(samp,~.-time) # taking out TIME, since time is the Random effects.
   mmsamp  <- model.matrix(tmpsamp,data)
-
-
+  
+  
   RE = c(F,F,F)
   if ("time" %in% (attr(terms(spec),"term.labels"))){
     # random effects/temporal effect speciation rates
@@ -155,7 +155,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   } else {
     Zspec <- NULL
   }
-
+  
   if ("time" %in% (attr(terms(ext),"term.labels"))){
     # random effects/temporal effect speciation rates
     Zext <- diag(length(dts)-1) # basically the RE for spec
@@ -163,7 +163,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   } else {
     Zext <- NULL
   }
-
+  
   if ("time" %in% (attr(terms(samp),"term.labels"))){
     # random effects/temporal effect speciation rates
     # Making 'RE' matrices.
@@ -178,7 +178,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   } else {
     Zsamp <- NULL
   }
-
+  
   # cbind(mmsamp*c(0.3), Zsamp*runif(length(dts)))
   # THIS MIGHT BE DIFFERENT FRMO BEFORE, NOW DRIVERS
   # are BEfore variances in the x-array.
@@ -186,17 +186,17 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   alphinx$specInx   = c(1,seq(4,        length.out=(dim(mmspec)[2]-1)))
   alphinx$extInx    = c(2,seq(max(c(3,alphinx$specInx))+1,length.out=(dim(mmext)[2]-1)))
   alphinx$sampInx   = c(3,seq(max(c(3,alphinx$specInx,alphinx$extInx))+1,length.out=(dim(mmsamp)[2]-1)))
-
-
+  
+  
   alphinx$varInx    = seq(max(unlist(alphinx)+1),length.out=sum(RE))
   alphinx$specReInx = seq(max(unlist(alphinx)+1),length.out=RE[1]*(length(dts)-1))
   alphinx$extReInx  = seq(max(unlist(alphinx)+1),length.out=RE[2]*(length(dts)-1))
   alphinx$sampReInx = seq(max(unlist(alphinx)+1),length.out=RE[3]*(length(dts)-2))
-
+  
   names(alphinx$specInx) <- colnames(mmspec)
   names(alphinx$extInx)  <- colnames(mmext)
   names(alphinx$sampInx) <- colnames(mmsamp)
-
+  
   npar <- dim(mmspec)[2] + dim(mmext)[2] + dim(mmsamp)[2] + sum(RE*1) + RE[1]*(length(dts)-1) + RE[2]*(length(dts)-1) + RE[3]*(length(dts)-2)
   # This is number of parameters in total.
   # sum(DivDep*1) + nSmpTS+nExtTS+nSpecTS + sum(Driv_x_Div_Spec) + sum(Driv_x_Div_Ext); # number of mean+hyperparameters
@@ -221,13 +221,13 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     # if RE's
     lsampfun <- function(x){rowSums(cbind(mmsamp %*% x[alphinx$sampInx], Zsamp %*% x[alphinx$sampReInx]))}
   }
-
+  
   # making div function
   n_est <- function(x){ (n[1:length(dts)-1]/
                            (rate2prob(exp(lsampfun(x)),dts)[1:(length(dts)-1)]))}
   n_norm <- function(x){( n_est(x)-mean(n_est(x)))/sd(n_est(x))};
-
-
+  
+  
   if (is.null(Zspec)){# If no RE for speciation
     if (dim(mmspec)[2]==1){# if only intercept
       lspecfun <- function(x){rep(x[1],length(dts)-1)}
@@ -248,7 +248,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     }
   } else {# if RE's
     # lspecfun <- function(x){rowSums(cbind(mmspec %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))}
-
+    
     if (updmmx[1]){
       # If div-dep, fill in with divers
       # if ((dim(attr(terms(spec),"factors"))[1] != dim(attr(terms(spec),"factors"))[1])){
@@ -261,10 +261,10 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     } else {
       lspecfun <- function(x){rowSums(cbind(mmspec %*% x[alphinx$specInx], Zspec %*% x[alphinx$specReInx]))}
     }
-
+    
   }
-
-
+  
+  
   if (is.null(Zext)){# If no RE for extinction
     if (dim(mmext)[2]==1){# if only intercept
       lextfun <- function(x){rep(x[2],length(dts)-1)}
@@ -286,11 +286,11 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lextfun <- function(x){rowSums(cbind(mmext_f(x) %*% x[alphinx$extInx], Zext %*% x[alphinx$extReInx]))}
     }
   }
-
+  
   # what is needed for output? do we need the ltms?
   # make a function for the fixed+random effect matrices, as fn of x?
   # We want specratefun etc,
-
+  
   myll <- function(x){
     # Simple 3 rate model. Estimated on log x. Fecundity
     # is assumed to be poisson-like, i.e. actual speciation/fecundity for an interval
@@ -313,7 +313,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     if (is.na(ll$LogL)){ll$LogL = -Inf};
     if (is.nan(ll$LogL)){ll$LogL = -Inf};
     return(ll)
-
+    
   }
   inxDriv = seq(4,length.out=dim(mmspec)[2]+ dim(mmext)[2]+dim(mmsamp)[2]-3) # index into 'drivers' non intercepts.
   if (any(RE)){
@@ -327,9 +327,9 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
         sapply(inxDriv,function(ii){dnorm(x[ii],priorsNorm_Cov[1],priorsNorm_Cov[2],log=T)}))}
   }
-
+  
   probfun <- function(x){myll(x)$LogL+sum(unlist(prfun(x)))}
-
+  
   out <- list(probfun= probfun,likfun=myll,priorf  = prfun,
               npar = npar,
               specfun = lspecfun,extfun=lextfun,sampfun=lsampfun,inx = alphinx,
@@ -340,6 +340,6 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   # inxDriv = inxDriv,RE = RE);
   attr(out,"class")<-"CMR_model"
   return(out)
-
-
+  
+  
 }
