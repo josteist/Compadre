@@ -13,8 +13,8 @@
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
 #'
-MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-3,
-                         draweps=niter/100,
+MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
+                         draweps=niter/noblc,noblc = 100,
                          x0=NULL,
                          cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
                          adapt=TRUE){
@@ -53,7 +53,7 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-3,
   # print(fullcall)
   print(paste0('MCMC run started at ', Sys.time()))
   x=x0;
-  noblc = niter/draweps;
+  # noblc = niter/draweps;
   # Number of blocks; the whole chain is divided into blocks for faster computation. The proposal
   # var/covariance matrix is updated in the first half of the MCMC chain at the end of each block.
   stp <- niter/nthin # NOT USED?
