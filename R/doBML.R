@@ -5,7 +5,7 @@
 #' @export
 doBML <- function(cmrfit,ndraws=1e4){
   myf <- cmrfit$Model$probfun
-  chain <- cmrfit$Chain[-c(1:(dim(fA5$Chain)[1]/2)),]
+  chain <- cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),]
   thetas <- apply(chain,2,mean);
   vcv    <- cov(chain);
   # mvtnorm::rmvnorm(draweps,sigma=cvstp)
