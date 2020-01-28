@@ -35,9 +35,10 @@ checkchains <- function(cmrfit){
          main='Effective sample sizes',xlab='ESS',ylab='# parameters')
     hist(esstmp[c(unlist(cmrfit$Model$inx[1:3]))],breaks=brks,col=cls[2],add = TRUE)
     hist(esstmp[1:3],breaks=brks,col=cls[1],add = TRUE)
+    if (max(unlist(cmrfit$Model$inx))){
     plot.new()
-    legend(x=c(0,1),y=c(0,1),c('Means','Drivers','REs'),fill=cls,bty=NULL,cex=0.8)
-
+    legend(x=c(0,1),y=c(0,1),c('Means','Drivers','REs'),fill=cls,bty='n',cex=0.8)
+    }
   } else {
     # two clade model
     # 8 panels?

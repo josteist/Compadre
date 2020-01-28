@@ -4,9 +4,20 @@
 \alias{make_BayesCMR_2clades}
 \title{Function to construct two clade CMR-model.}
 \usage{
-make_BayesCMR_2clades(Obs1, Obs2, dts = rep(1, dim(Obs1)[2]),
-  spec1 = ~time, ext1 = ~time, samp1 = ~time, spec2 = ~time,
-  ext2 = ~time, samp2 = ~time, pfix = 2, data = NULL, ...)
+make_BayesCMR_2clades(
+  Obs1,
+  Obs2,
+  dts = rep(1, dim(Obs1)[2]),
+  spec1 = ~time,
+  ext1 = ~time,
+  samp1 = ~time,
+  spec2 = ~time,
+  ext2 = ~time,
+  samp2 = ~time,
+  pfix = 2,
+  data = NULL,
+  ...
+)
 }
 \arguments{
 \item{Obs1}{observations clade 1: a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
@@ -15,20 +26,14 @@ make_BayesCMR_2clades(Obs1, Obs2, dts = rep(1, dim(Obs1)[2]),
 
 \item{dts}{a vector of interval durations. Defaults to series of 1's if not given.}
 
-\item{DivDepSpecMatrix}{matrix of interactions between clades on speciation rates. Given as unique integers, starting at 1. For only diversity dependence of speciation rates within clades = matrix(c(1,NA,NA,2),nrow=2). For only between clade interactions = matrix(c(NA,1,2,NA),nrow=2). Similarly for DivDepExtMatrix, starting at the ma(DivDepSpecMatrix)+1}
+\item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.}
 
-\item{SpecTS_1/2}{drivers for speciation rates for clades 1/2}
+\item{data}{data frame of possible external drivers.}
 
-\item{ExtTS_1/2}{drivers for extinction rates for clades 1/2}
-
-\item{SmpTS_1/2}{drivers for sampling rates}
-
-\item{Driv_x_Div_Spec_1/2}{whether or not speciation drivers interact with diversity in clade 1/2}
-
-\item{Driv_x_Div_Spec_1/2}{whether or not extinction drivers interact with diversity in clade1/2. TRUE or FALSE of length equal to number of drivers.}
+\item{spec1/ext1/samp1}{Formulas for clade 1. Estimated diversity of clade 1 is denoted div1 and for clade 2, div2. E.g. spec1 = ~div1+div2+time, will include two impacts on the speciatino rate of clade 1, estimated diversity of clade 1 (div1) and estimated diversity of clade 2 (div2). These can also interact with other drivers, e.g. spec1= ~div1*driver1 + time}
 }
 \value{
-this function yields whatnow?
+CMR_model
 }
 \description{
 This function generates a structure containing the necessary functions for a

@@ -5,8 +5,16 @@
 \title{internal plottingfunction
 export}
 \usage{
-plotfun_internal(spec_smps, ext_smps, smp_smps, bnds, tmpl,
-  stages = NULL, quantiles = c(0.025, 0.5, 0.975), main = "")
+plotfun_internal(
+  spec_smps,
+  ext_smps,
+  smp_smps,
+  bnds,
+  tmpl,
+  stages = NULL,
+  quantiles = c(0.025, 0.5, 0.975),
+  main = ""
+)
 }
 \description{
 internal plottingfunction

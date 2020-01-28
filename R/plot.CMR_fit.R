@@ -27,7 +27,7 @@ plot.CMR_fit <- function(fit,...){
            border= c(rgb(0.1,0.1,0.8,0.6),
                      rgb(0.8,0.1,0.1,0.6),
                      rgb(0.1,0.8,0.1,0.6)))
-  out <- list(SpecRates = tmp[,1],ExtRates=tmp[,2],SampRates[,3]);
+  out <- list(SpecRates = tmp[,1],ExtRates=tmp[,2],SampRates = tmp[,3]);
   tmp <- out;
       } else {
   tmp <- invisible(plotRates(fit,...))

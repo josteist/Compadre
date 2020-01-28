@@ -4,9 +4,16 @@
 \alias{plotRates}
 \title{Extract and plot macroevolutionary rates from a CMR model fit.}
 \usage{
-plotRates(cmrfit, max_ma = NULL, stages = NULL, logax = T,
-  draws = 250, quantiles = c(0.025, 0.5, 0.975), plot = T,
-  cladenames = NULL)
+plotRates(
+  cmrfit,
+  max_ma = NULL,
+  stages = NULL,
+  logax = T,
+  draws = 250,
+  quantiles = c(0.025, 0.5, 0.975),
+  plot = T,
+  cladenames = NULL
+)
 }
 \arguments{
 \item{cmrfit}{A model fit, as output from \link{MCMC_CMR}}

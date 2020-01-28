@@ -4,9 +4,13 @@
 \alias{sim_BD_func}
 \title{Function to simulate a birth-death-fossilization process.}
 \usage{
-sim_BD_func(spec = function(t, n) {     0.1 }, ext = function(t, n) {  
-    0.001 }, samp = function(t) {     0.3 }, n_init = 100,
-  dt_ints = rep(1, 10))
+sim_BD_func(
+  spec = function(t, n) {     0.1 },
+  ext = function(t, n) {     0.001 },
+  samp = function(t) {     0.3 },
+  n_init = 100,
+  dt_ints = rep(1, 10)
+)
 }
 \arguments{
 \item{spec}{Speciation rate. Either given as a fixed rate or as a function of time (\emph{t}) \emph{and} richness (\emph{n}). Defaults to 0.1.}

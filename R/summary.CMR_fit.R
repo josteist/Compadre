@@ -9,218 +9,190 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
     # Single clade model
     smp <- round(seq(dim(cmrfit$Chain)[1]/2,
                      dim(cmrfit$Chain)[1],length.out=nsamp))
-    writeLines("\t \t \t=== Speciation rate parameters ===")
-    writeLines(c("       ","\t\t\t",
-                 "mean",
-                 "2.5%",
-                 "median",
-                 "97.5%",
-                 "p >/<0 ",
-                 "Eff SS"),sep="\t")
-    cat("\n")
+    
+    tmpspec <- array(NA,c(length(cmrfit$Model$inx$specInx),6))
+    tmpnam <- c()
     for (ii in 1:length(cmrfit$Model$inx$specInx)){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$specInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$specInx)[[ii]]);
+      tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$specInx)[[ii]]);
       if (ii==1){
         tmp = exp(tmp);
-        tmpnam = 'Overall rate';
-
+        tmpnam[[ii]] = 'Overall rate';
       }
-      # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:dim(f1$Chain)[2]/2),])))
-      # return(ESSs=coda::effectiveSize(coda::as.mcmc(f1$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),])))
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$specInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$specInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmpspec[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]]))
     }
-    cat("\n")
-    writeLines("\t \t \t=== Extinction rate parameters ===")
-    writeLines(c("       ","\t\t\t",
-                 "mean",
-                 "2.5%",
-                 "median",
-                 "97.5%",
-                 "p >/<0 ",
-                 "Eff SS"),sep="\t")
-    cat("\n")
-    # Should we 'unlog' intercept to get the mean 'rate'?
+    colnames(tmpspec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmpspec) <- tmpnam;
+    ### Extinction
+    tmpext <- array(NA,c(length(cmrfit$Model$inx$extInx),6))
+    tmpnam <- c()
     for (ii in 1:length(cmrfit$Model$inx$extInx)){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$extInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$extInx)[[ii]]);
+      tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$extInx)[[ii]]);
       if (ii==1){
         tmp = exp(tmp);
-        tmpnam = 'Overall rate';
-
+        tmpnam[[ii]] = 'Overall rate';
       }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$extInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$extInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmpext[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]]))
     }
-    cat("\n")
-    writeLines("\t \t \t=== Sampling rate parameters ===")
-    writeLines(c("       ","\t\t\t",
-                 "mean",
-                 "2.5%",
-                 "median",
-                 "97.5%",
-                 "p >/<0 ",
-                 "Eff SS"),sep="\t")
-    cat("\n")
+    colnames(tmpext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmpext) <- tmpnam;
+  ## == SAMPLING
+    tmpsamp <- array(NA,c(length(cmrfit$Model$inx$sampInx),6))
+    tmpnam <- c()
     for (ii in 1:length(cmrfit$Model$inx$sampInx)){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$sampInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$sampInx)[[ii]]);
+      tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$sampInx)[[ii]]);
       if (ii==1){
         tmp = exp(tmp);
-        tmpnam = 'Overall rate';
-
+        tmpnam[[ii]] = 'Overall rate';
       }
-
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$sampInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$sampInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmpsamp[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]]))
     }
+    colnames(tmpsamp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmpsamp) <- tmpnam;
+    writeLines("\t \t \t=== Speciation rate parameters ===")
+    print(tmpspec,digits=3)
+    writeLines("\t \t \t=== Extinction rate parameters ===")
+    print(tmpext,digits=3)
+    writeLines("\t \t \t=== Sampling rate parameters ===")
+    print(tmpsamp,digits=3)
+    out = list(SpecStat=tmpspec,
+               ExtStat =tmpext,
+               SampStat=tmpsamp);
+    # rownames(tmpspec) <- c('Overall rate',noquote(names(cmrfit$Model$inx$specInx)[[2]]))
+    # format(tmpspec,digits=3)
+    return(invisible(out));
   } else {
-    # TWo clade model
+    # Two clade model...
+    # Single clade model
     smp <- round(seq(dim(cmrfit$Chain)[1]/2,
                      dim(cmrfit$Chain)[1],length.out=nsamp))
-    writeLines("\t \t \t=== Speciation rate parameters ===")
-    writeLines(c("       ","\t\t\t",                 "mean",                 "2.5%",                 "median",                 "97.5%",                 "p >/<0 ",                 "Eff SS"),sep="\t")
-    cat("\n")
-    writeLines("\t \t Clade 1")
+    
+    tmp1spec <- array(NA,c(length(cmrfit$Model$inx$inx1$specInx),6))
+    tmp1nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx1$specInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$specInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx1$specInx)[[ii]]);
+      tmp1 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$specInx[ii]];
+      tmp1nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx1$specInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
+        tmp1 = exp(tmp1);
+        tmp1nam[[ii]] = 'Overall rate';
       }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$specInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$specInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmp1spec[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$specInx[ii]]))
     }
-    cat("\n")
-    writeLines("\t \t Clade 2")
-    for (ii in 1:length(cmrfit$Model$inx$inx2$specInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$specInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx2$specInx)[[ii]]);
-      if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
-      }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$specInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$specInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$specInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
-    }
-    cat("\n")
-
-    writeLines("\t \t \t=== Extinction rate parameters ===")
-    writeLines(c("       ","\t\t\t",                 "mean",                 "2.5%",                 "median",                 "97.5%",                 "p >/<0 ",                 "Eff SS"),sep="\t")
-    cat("\n")
-    writeLines("\t \t Clade 1")
+    colnames(tmp1spec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp1spec) <- tmp1nam;
+    ### Extinction
+    tmp1ext <- array(NA,c(length(cmrfit$Model$inx$inx1$extInx),6))
+    tmp1nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx1$extInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$extInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx1$extInx)[[ii]]);
+      tmp1 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$extInx[ii]];
+      tmp1nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx1$extInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
+        tmp1 = exp(tmp1);
+        tmp1nam[[ii]] = 'Overall rate';
       }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$extInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$extInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmp1ext[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$extInx[ii]]))
     }
-    cat("\n")
-    writeLines("\t \t Clade 2")
-    for (ii in 1:length(cmrfit$Model$inx$inx2$extInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$extInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx2$extInx)[[ii]]);
-      if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
-      }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$extInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$extInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$extInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
-    }
-    cat("\n")
-
-
-    writeLines("\t \t \t=== Sampling rate parameters ===")
-    writeLines(c("       ","\t\t\t",                 "mean",                 "2.5%",                 "median",                 "97.5%",                 "p >/<0 ",                 "Eff SS"),sep="\t")
-    cat("\n")
-    writeLines("\t \t Clade 1")
+    colnames(tmp1ext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp1ext) <- tmp1nam;
+    ## == SAMPLING
+    tmp1samp <- array(NA,c(length(cmrfit$Model$inx$inx1$sampInx),6))
+    tmp1nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx1$sampInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$sampInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx1$sampInx)[[ii]]);
+      tmp1 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx1$sampInx[ii]];
+      tmp1nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx1$sampInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
+        tmp1 = exp(tmp1);
+        tmp1nam[[ii]] = 'Overall rate';
       }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$sampInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx1$sampInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmp1samp[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$sampInx[ii]]))
     }
-    cat("\n")
-    writeLines("\t \t Clade 2")
+    colnames(tmp1samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp1samp) <- tmp1nam;
+    
+    
+    
+    
+    
+    
+    tmp2spec <- array(NA,c(length(cmrfit$Model$inx$inx2$specInx),6))
+    tmp2nam <- c()
+    for (ii in 1:length(cmrfit$Model$inx$inx2$specInx)){
+      tmp2 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$specInx[ii]];
+      tmp2nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx2$specInx)[[ii]]);
+      if (ii==1){
+        tmp2 = exp(tmp2);
+        tmp2nam[[ii]] = 'Overall rate';
+      }
+      tmp2spec[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$specInx[ii]]))
+    }
+    colnames(tmp2spec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp2spec) <- tmp2nam;
+    ### Extinction
+    tmp2ext <- array(NA,c(length(cmrfit$Model$inx$inx2$extInx),6))
+    tmp2nam <- c()
+    for (ii in 1:length(cmrfit$Model$inx$inx2$extInx)){
+      tmp2 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$extInx[ii]];
+      tmp2nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx2$extInx)[[ii]]);
+      if (ii==1){
+        tmp2 = exp(tmp2);
+        tmp2nam[[ii]] = 'Overall rate';
+      }
+      tmp2ext[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$extInx[ii]]))
+    }
+    colnames(tmp2ext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp2ext) <- tmp2nam;
+    ## == SAMPLING
+    tmp2samp <- array(NA,c(length(cmrfit$Model$inx$inx2$sampInx),6))
+    tmp2nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx2$sampInx)){
-      tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$sampInx[ii]];
-      tmpnam <- noquote(names(cmrfit$Model$inx$inx2$sampInx)[[ii]]);
+      tmp2 <- cmrfit$Chain[smp,cmrfit$Model$inx$inx2$sampInx[ii]];
+      tmp2nam[[ii]] <- noquote(names(cmrfit$Model$inx$inx2$sampInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam = 'Overall rate';
+        tmp2 = exp(tmp2);
+        tmp2nam[[ii]] = 'Overall rate';
       }
-      writeLines(c(tmpnam,
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$sampInx)[[ii]])>7,"","\t"),
-                   ifelse(nchar(names(cmrfit$Model$inx$inx2$sampInx)[[ii]])>14,"","\t"),
-                   format(c(mean(tmp),
-                            quantile(tmp,c(0.025,0.5,0.975)),
-                            sum(tmp*(sign(mean(tmp)))<0)/length(smp),
-                            coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$sampInx[ii]])),digits=2,nsmall=2)),sep="\t")
-      cat("\n")
+      tmp2samp[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$sampInx[ii]]))
     }
-    cat("\n")
-
+    colnames(tmp2samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
+    rownames(tmp2samp) <- tmp2nam;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    writeLines("\t \t \t=== Speciation rate parameters ===")
+    writeLines("\t \t \t Clade 1")
+    print(tmpspec1,digits=3)
+    writeLines("\t \t \t Clade 2")
+    print(tmpspec2,digits=3)
+    writeLines("\t \t \t=== Extinction rate parameters ===")
+    writeLines("\t \t \t Clade 1")
+    print(tmpext1,digits=3)
+    writeLines("\t \t \t Clade 2")
+    print(tmpext2,digits=3)
+    writeLines("\t \t \t=== Sampling rate parameters ===")
+    writeLines("\t \t \t Clade 1")
+    print(tmpsamp1,digits=3)
+    writeLines("\t \t \t Clade 2")
+    print(tmpsamp2,digits=3)
+    
+    out = list(SpecStat_Clade1= tmpspec1,
+               ExtStat_Clade1 = tmpext1,
+               SampStat_Clade1= tmpsamp1,
+               SpecStat_Clade2= tmpspec2,
+               ExtStat_Clade2 = tmpext2,
+               SampStat_Clade2= tmpsamp2);
+    # rownames(tmpspec) <- c('Overall rate',noquote(names(cmrfit$Model$inx$inx1$specInx)[[2]]))
+    # format(tmpspec,digits=3)
+    return(invisible(out));
   }
+  
 }
-
-# mysf(fa)
-# THis could work (the length of stats output is increased by 1 if neg)
-# have a switch for length of 'driver name' if > 6 chars

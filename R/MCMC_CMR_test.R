@@ -13,14 +13,17 @@
 #' @return a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
 #' @export
 #'
-MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
-                         draweps=niter/noblc,noblc = 100,
-                         x0=NULL,
-                         cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
-                         adapt=TRUE){
+MCMC_CMR_test <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
+                     draweps=niter/noblc,noblc = 100,
+                     x0=NULL,
+                     cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
+                     adapt=TRUE){
   # Perhaps this works better if we ignore the 'covariance' part in the early phase (since most is prob directional anyways) and introduce it
   # Adaptive MCMC approach, tuning the stps to the covariance of the
   # chain for the first half of the run.
+
+  # This sampler does not work properly 24.01.2020. THe pmin of the vmin makes the posterior dependent on the sampling parameters, which should not be the case
+
   # The covariance proposal is updated each draweps iteration the
   # first half og the total niter [number of iterations.]
   # _v2 should store all samples for each block(draweps), and use the samples from the last block
@@ -88,11 +91,10 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
       # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(X_Big[round(tix/2):(tix-1),])  +
       # diag(vmin,cmrModel$npar))
       # BELOW WAS COMMENTED OUT 110619 for testing setting the stepsize for main pars to /10 of others
-      # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
-                                                 # diag(vmin,cmrModel$npar))
-      # Testing 301019, instead of +vmin, do pmax(vmin)
-      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X));
-      diag(cvstp) <- pmax(diag(cvstp),vmin)
+      tmpCov <- cov(tmp_X)
+      diag(tmpCov) <- pmax(apply(tmp_X,2,var),vmin)
+      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(tmpCov)
+
 
 
       # print(cvstp[1:4,1:4])

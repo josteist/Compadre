@@ -4,25 +4,23 @@
 \alias{sim_BD_func_v2}
 \title{Function to simulate a birth-death-fossilization process.}
 \usage{
-sim_BD_func_v2(spec = function(t, n) {     0.1 }, ext = function(t, n)
-  {     0.001 }, samp = function(t) {     0.3 }, n_init = 100,
-  dt_ints = rep(1, 10))
+sim_BD_func_v2(
+  spec = function(t, n) {     0.1 },
+  ext = function(t, n) {     0.001 },
+  samp = function(t) {     0.3 },
+  n_init = 100,
+  dt_ints = rep(1, 10)
+)
 
-sim_BD_func_v2(spec = function(t, n) {     0.1 }, ext = function(t, n)
-  {     0.001 }, samp = function(t) {     0.3 }, n_init = 100,
-  dt_ints = rep(1, 10))
+sim_BD_func_v2(
+  spec = function(t, n) {     0.1 },
+  ext = function(t, n) {     0.001 },
+  samp = function(t) {     0.3 },
+  n_init = 100,
+  dt_ints = rep(1, 10)
+)
 }
 \arguments{
-\item{spec}{Speciation rate. Either given as a fixed rate or as a function of time (\emph{t}) \emph{and} richness (\emph{n}). Defaults to 0.1.}
-
-\item{ext}{Extinction rate. Given as fixed rate or function of time and richness. Defaults to 0.001.}
-
-\item{samp}{Sampling rate, given as fixed rate or function of time (\emph{t}) only. Defaults to 0.3}
-
-\item{n_init}{Initial number of lineages. Defaults to 100.}
-
-\item{dt_ints}{Array of 'intervals' in which to generate the fossil record, as an array of interval durations. All lineages sampled within these intervals are placed in the interval, regardless of precise time it was sampled for the output \emph{FosRec}. Defaults to rep(1,10)}
-
 \item{spec}{Speciation rate. Either given as a fixed rate or as a function of time (\emph{t}) \emph{and} richness (\emph{n}). Defaults to 0.1.}
 
 \item{ext}{Extinction rate. Given as fixed rate or function of time and richness. Defaults to 0.001.}

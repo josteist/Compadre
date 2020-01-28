@@ -10,6 +10,7 @@
 
 
 pradel_unvd_gam = function(gam,ext,p,u,n,v,d,minval=1e-5){
+  # JOS: 242020: made the checking for values close to 0 and 1 into a funtion()
   # JOS: 120219: changed the indexing so that INPUTTED GAM is length 1 OR t=s-1. Then internally here, the first gam is set to 0.
   #
   # JOS: 180917
@@ -44,9 +45,9 @@ pradel_unvd_gam = function(gam,ext,p,u,n,v,d,minval=1e-5){
   # Changing parameterization.
   # IMplementing some min/max here, so that these do not
   # go to 1 or 0. Say they need to min be 1e-5 and 1-1e-5 resp?
-  gam = pmin(1-minval,pmax(gam,minval));
-  ext = pmin(1-minval,pmax(ext,minval));
-  p   = pmin(1-minval,pmax(p,  minval));
+  gam = mypmin(gam,minval);#pmin(1-minval,pmax(gam,minval));
+  ext = mypmin(ext,minval);# pmin(1-minval,pmax(ext,minval));
+  p   = mypmin(p,minval);# pmin(1-minval,pmax(p,  minval));
   phi = 1 - ext; # Survival is 1 - extinction.
   #phi[t] = 0;    # set to 0, since unestimatable.
   # THis is the confusing with Tenan, they have transition

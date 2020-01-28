@@ -4,10 +4,19 @@
 \alias{make_BayesCMR_old}
 \title{Function to construct one clade CMR-model.}
 \usage{
-make_BayesCMR_old(Obs, dts = rep(1, dim(Obs)[2]), spec = ~1,
-  ext = ~1, samp = ~1, data = NULL, pfix = 2,
-  priorsNorm_Cov = c(0, 2), priorsNorm_Mus = rep(list(c(-4, 4)), 3),
-  priorsUnif = c(-3, 3), replRE_1 = F)
+make_BayesCMR_old(
+  Obs,
+  dts = rep(1, dim(Obs)[2]),
+  spec = ~1,
+  ext = ~1,
+  samp = ~1,
+  data = NULL,
+  pfix = 2,
+  priorsNorm_Cov = c(0, 2),
+  priorsNorm_Mus = rep(list(c(-4, 4)), 3),
+  priorsUnif = c(-3, 3),
+  replRE_1 = F
+)
 }
 \arguments{
 \item{Obs}{a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
