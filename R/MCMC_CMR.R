@@ -91,8 +91,8 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
       # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
                                                  # diag(vmin,cmrModel$npar))
       # Testing 301019, instead of +vmin, do pmax(vmin)
-      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X));
-      diag(cvstp) <- pmax(diag(cvstp),vmin)
+      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)) + diag(vmin,cmrModel$npar);
+      # diag(cvstp) <- pmax(diag(cvstp),vmin)
 
 
       # print(cvstp[1:4,1:4])

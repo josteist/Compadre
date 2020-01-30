@@ -92,8 +92,8 @@ MCMC_CMR_test <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
       # diag(vmin,cmrModel$npar))
       # BELOW WAS COMMENTED OUT 110619 for testing setting the stepsize for main pars to /10 of others
       tmpCov <- cov(tmp_X)
-      diag(tmpCov) <- pmax(apply(tmp_X,2,var),vmin)
-      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(tmpCov)
+      # diag(tmpCov) <- pmax(apply(tmp_X,2,var),vmin)
+      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(tmpCov) + diag(vmin,cmrModel$npar);
 
 
 

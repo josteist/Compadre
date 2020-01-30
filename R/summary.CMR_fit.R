@@ -9,7 +9,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
     # Single clade model
     smp <- round(seq(dim(cmrfit$Chain)[1]/2,
                      dim(cmrfit$Chain)[1],length.out=nsamp))
-    
+
     tmpspec <- array(NA,c(length(cmrfit$Model$inx$specInx),6))
     tmpnam <- c()
     for (ii in 1:length(cmrfit$Model$inx$specInx)){
@@ -68,7 +68,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
     # Single clade model
     smp <- round(seq(dim(cmrfit$Chain)[1]/2,
                      dim(cmrfit$Chain)[1],length.out=nsamp))
-    
+
     tmp1spec <- array(NA,c(length(cmrfit$Model$inx$inx1$specInx),6))
     tmp1nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx1$specInx)){
@@ -110,12 +110,12 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
     }
     colnames(tmp1samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp1samp) <- tmp1nam;
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     tmp2spec <- array(NA,c(length(cmrfit$Model$inx$inx2$specInx),6))
     tmp2nam <- c()
     for (ii in 1:length(cmrfit$Model$inx$inx2$specInx)){
@@ -157,42 +157,42 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
     }
     colnames(tmp2samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp2samp) <- tmp2nam;
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     writeLines("\t \t \t=== Speciation rate parameters ===")
     writeLines("\t \t \t Clade 1")
-    print(tmpspec1,digits=3)
+    print(tmp1spec,digits=3)
     writeLines("\t \t \t Clade 2")
-    print(tmpspec2,digits=3)
+    print(tmp2spec,digits=3)
     writeLines("\t \t \t=== Extinction rate parameters ===")
     writeLines("\t \t \t Clade 1")
-    print(tmpext1,digits=3)
+    print(tmp1ext,digits=3)
     writeLines("\t \t \t Clade 2")
-    print(tmpext2,digits=3)
+    print(tmp2ext,digits=3)
     writeLines("\t \t \t=== Sampling rate parameters ===")
     writeLines("\t \t \t Clade 1")
-    print(tmpsamp1,digits=3)
+    print(tmp1samp,digits=3)
     writeLines("\t \t \t Clade 2")
-    print(tmpsamp2,digits=3)
-    
-    out = list(SpecStat_Clade1= tmpspec1,
-               ExtStat_Clade1 = tmpext1,
-               SampStat_Clade1= tmpsamp1,
-               SpecStat_Clade2= tmpspec2,
-               ExtStat_Clade2 = tmpext2,
-               SampStat_Clade2= tmpsamp2);
+    print(tmp2samp,digits=3)
+
+    out = list(SpecStat_Clade1= tmp1spec,
+               ExtStat_Clade1 = tmp1ext,
+               SampStat_Clade1= tmp1samp,
+               SpecStat_Clade2= tmp2spec,
+               ExtStat_Clade2 = tmp2ext,
+               SampStat_Clade2= tmp2samp);
     # rownames(tmpspec) <- c('Overall rate',noquote(names(cmrfit$Model$inx$inx1$specInx)[[2]]))
     # format(tmpspec,digits=3)
     return(invisible(out));
   }
-  
+
 }
