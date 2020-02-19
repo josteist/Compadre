@@ -11,7 +11,7 @@ plotRates(
   logax = T,
   draws = 250,
   quantiles = c(0.025, 0.5, 0.975),
-  plot = T,
+  drawplot = TRUE,
   cladenames = NULL
 )
 }
@@ -26,7 +26,7 @@ plotRates(
 
 \item{draws}{number of samples drawn from the MCMC chain (single number). Alternatively could be set of values indexing into the MCMC-chain.}
 
-\item{plot}{(T/F) if plot figure, defaults to TRUE.}
+\item{drawplot}{(T/F) if plot figure, defaults to TRUE.}
 
 \item{qauntiles}{gives the upper and lower quantiles for plotting bars around median, and the centre. Defaults to c(0.025,0.5,0.975).}
 }

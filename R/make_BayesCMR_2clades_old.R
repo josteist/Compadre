@@ -18,7 +18,7 @@
 #'
 #'
 #'
-make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
+make_BayesCMR_2clades_old <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
                                  spec1 = ~time, ext1 = ~time, samp1 = ~time,
                                  spec2 = ~time, ext2 = ~time, samp2 = ~time,pfix=2,data=NULL,...){
   # The goal with this is to actually have formulas as inputs.
@@ -45,7 +45,6 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
   # origdata = drivers;
   # data = drivers
   # normalizing data
-  dts_se <- dts[-1]/2 + dts[-length(dts)]/2
   ## TO DO: If last entry (stage) is included in the data.frame, must be removed from normalization!!!
   # Split into two data's, one for samp (length(dts)) and one for spec/ext (SE)
   if (!is.null(data)){
@@ -341,23 +340,27 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
     lfec2  = lspecfun2(x);
     lext2  = lextfun2(x);
     lsmp2  = lsampfun2(x);
-  # taking out the [ii]'s for time-improvement.
+
     ll1 <- pradel_unvd_gam(
-      ext = (exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/
-          (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1)),
-      gam <- (1-(exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/
-           (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1)))/
-          exp((exp(lfec1)-exp(lext1))*dts_se),
-      p   = rate2prob(exp(lsmp1),dts),
+      ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext1[ii])*((exp((exp(lfec1[ii])-exp(lext1[ii]))*dts[ii]))-1))/
+          (exp(lfec1[ii])*((exp((exp(lfec1[ii])-exp(lext1[ii]))*dts[ii])))-exp(lext1[ii]))}),
+      gam <- sapply(1:(length(dts)-1),function(ii){
+        (1-(exp(lext1[ii])*((exp((exp(lfec1[ii])-exp(lext1[ii]))*dts[ii]))-1))/
+           (exp(lfec1[ii])*((exp((exp(lfec1[ii])-exp(lext1[ii]))*dts[ii])))-exp(lext1[ii])))/
+          exp((exp(lfec1[ii])-exp(lext1[ii]))*dts[ii])}),
+      p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp1[ii]),dts[ii])}),
       u1,n1,v1,d1);
 
     ll2 <- pradel_unvd_gam(
-      ext = (exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/
-          (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2)),
-      gam = (1-(exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/
-           (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2)))/
-          exp((exp(lfec2)-exp(lext2))*dts_se),
-      p   = rate2prob(exp(lsmp2),dts),
+      ext = sapply(1:(length(dts)-1),function(ii){
+          (exp(lext2[ii])*((exp((exp(lfec2[ii])-exp(lext2[ii]))*dts[ii]))-1))/
+          (exp(lfec2[ii])*((exp((exp(lfec2[ii])-exp(lext2[ii]))*dts[ii])))-exp(lext2[ii]))}),
+      gam <- sapply(1:(length(dts)-1),function(ii){
+        (1-(exp(lext2[ii])*((exp((exp(lfec2[ii])-exp(lext2[ii]))*dts[ii]))-1))/
+           (exp(lfec2[ii])*((exp((exp(lfec2[ii])-exp(lext2[ii]))*dts[ii])))-exp(lext2[ii])))/
+          exp((exp(lfec2[ii])-exp(lext2[ii]))*dts[ii])}),
+      p   = sapply(1:(length(dts)),function(ii){rate2prob(exp(lsmp2[ii]),dts[ii])}),
       u2,n2,v2,d2);
 
     if (is.infinite(ll1$LogL)){ll1$LogL = -Inf};

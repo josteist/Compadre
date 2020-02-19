@@ -12,6 +12,7 @@ plotfun_internal(
   bnds,
   tmpl,
   stages = NULL,
+  drawplot = TRUE,
   quantiles = c(0.025, 0.5, 0.975),
   main = ""
 )
