@@ -7,7 +7,7 @@
 getInit(cmrModel)
 }
 \arguments{
-\item{cmrModel}{A CMR model structure.}
+\item{cmrModel}{A CMR model structure with 1 clade.}
 }
 \value{
 The function returns relatively decent initial values for MCMC estimation.
