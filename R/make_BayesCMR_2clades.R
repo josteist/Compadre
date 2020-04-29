@@ -11,6 +11,7 @@
 #' @param dts a vector of interval durations. Defaults to series of 1's if not given.
 #' @param spec1/ext1/samp1 Formulas for clade 1. Estimated diversity of clade 1 is denoted div1 and for clade 2, div2. E.g. spec1 = ~div1+div2+time, will include two impacts on the speciatino rate of clade 1, estimated diversity of clade 1 (div1) and estimated diversity of clade 2 (div2). These can also interact with other drivers, e.g. spec1= ~div1*driver1 + time
 #' @param pfix a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.
+#' @param modeltype Which parameterization of the likelihood functino to be used. See ?Compadre for details. Defaults to 'IV'
 #' @param data data frame of possible external drivers.
 #' @return CMR_model
 #' @export
@@ -20,7 +21,7 @@
 #'
 make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
                                  spec1 = ~time, ext1 = ~time, samp1 = ~time,
-                                 spec2 = ~time, ext2 = ~time, samp2 = ~time,pfix=2,data=NULL,...){
+                                 spec2 = ~time, ext2 = ~time, samp2 = ~time,pfix=2,modeltype='IV',data=NULL,...){
   # The goal with this is to actually have formulas as inputs.
   # There must be 6 formulas for this model (spec1,mu1,rho1) (spec2,mu2,rho2)
   # Alternatively we could say that if spec2 is not given, its same as spec1?
@@ -87,8 +88,8 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
                                div2=rep(0.2,length(dts)),
                                div12 = rep(0.3,length(dts))))
 
-  m1 <- make_BayesCMR(  Obs1, dts = dts,spec=spec1,ext=ext1,samp=samp1,data=data_tmp,pfix=pfix,...)
-  m2 <- make_BayesCMR(  Obs2, dts = dts,spec=spec2,ext=ext2,samp=samp2,data=data_tmp,pfix=pfix,...)
+  m1 <- make_BayesCMR(  Obs1, dts = dts,spec=spec1,ext=ext1,samp=samp1,data=data_tmp,pfix=pfix,modeltype=modeltype,...)
+  m2 <- make_BayesCMR(  Obs2, dts = dts,spec=spec2,ext=ext2,samp=samp2,data=data_tmp,pfix=pfix,modeltype=modeltype,...)
   # the mmspec outputted
   # Data/drivers for S/E
   # data_tmp <- data.frame(cbind(dataSE,div1=rep(0.1,length(dts)-1),
@@ -101,6 +102,7 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
   # The ones above are used for rate calcs, the ones below for n_norm etc
   inxs1 <- seq(1,length.out=m1$npar)
   inxs2 <- seq(1 + max(inxs1),length.out=m2$npar)
+  drivinx <- c(m1$driverinx,inxs2[m2$driverinx])
   # This is the probfun.
   # ltmpfun are m1$rat
   #
@@ -341,23 +343,58 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
     lfec2  = lspecfun2(x);
     lext2  = lextfun2(x);
     lsmp2  = lsampfun2(x);
+
+    if (modeltype=='I'){
+      extin1  <- 1-exp(-exp(lext1)*dts[-length(dts)])
+      gamin1  <-  (exp(-exp(lext1)*dts[-length(dts)]))/(exp((exp(lfec1)-exp(lext1))*dts[-length(dts)]))
+      sampin1 <- rate2prob(exp(lsmp1),dts)
+      extin2  <- 1-exp(-exp(lext2)*dts[-length(dts)])
+      gamin2  <-  (exp(-exp(lext2)*dts[-length(dts)]))/(exp((exp(lfec2)-exp(lext2))*dts[-length(dts)]))
+      sampin2 <- rate2prob(exp(lsmp2),dts)
+    } else if (modeltype == 'II'){
+      extin1  <-    (exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts[-length(dts)]))-1))/        (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts[-length(dts)])))-exp(lext1))
+      gamin1  <- (1-(exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts[-length(dts)]))-1))/        (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts[-length(dts)])))-exp(lext1)))/        exp((exp(lfec1)-exp(lext1))*dts[-length(dts)])
+      sampin1 <- rate2prob(exp(lsmp1),dts)
+      extin2 <-    (exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts[-length(dts)]))-1))/        (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts[-length(dts)])))-exp(lext2))
+      gamin2 <- (1-(exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts[-length(dts)]))-1))/        (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts[-length(dts)])))-exp(lext2)))/        exp((exp(lfec2)-exp(lext2))*dts[-length(dts)])
+      sampin2 <- rate2prob(exp(lsmp2),dts)
+    } else if (modeltype == 'III'){
+      extin1 <- 1-exp(-exp(lext1)*dts_se)
+      gamin1 <- (exp(-exp(lext1)*dts_se))/(exp((exp(lfec1)-exp(lext1))*dts_se))
+      sampin1 <- rate2prob(exp(lsmp1),dts)
+      extin2 <- 1-exp(-exp(lext2)*dts_se)
+      gamin2 <- (exp(-exp(lext2)*dts_se))/(exp((exp(lfec2)-exp(lext2))*dts_se))
+      sampin2 <- rate2prob(exp(lsmp2),dts)
+    } else if (modeltype == 'IV'){
+      extin1 <-    (exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/        (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1))
+      gamin1 <- (1-(exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/        (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1)))/        exp((exp(lfec1)-exp(lext1))*dts_se)
+      sampin1 <- rate2prob(exp(lsmp1),dts)
+      extin2 <-    (exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/        (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2))
+      gamin2 <- (1-(exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/        (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2)))/        exp((exp(lfec2)-exp(lext2))*dts_se)
+      sampin2 <- rate2prob(exp(lsmp2),dts)
+    } else if (modeltype == 'V'){
+      extin1  <- exp(lext1)/(exp(lext1)+1)
+      gamin1  <- exp(lfec1)/(exp(lfec1)+1)
+      sampin1 <- exp(lsmp1)/(exp(lsmp1)+1)
+      extin2  <- exp(lext2)/(exp(lext2)+1)
+      gamin2  <- exp(lfec2)/(exp(lfec2)+1)
+      sampin2 <- exp(lsmp2)/(exp(lsmp2)+1)
+    }
+
+
+
+
   # taking out the [ii]'s for time-improvement.
     ll1 <- pradel_unvd_gam(
-      ext = (exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/
-          (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1)),
-      gam <- (1-(exp(lext1)*((exp((exp(lfec1)-exp(lext1))*dts_se))-1))/
-           (exp(lfec1)*((exp((exp(lfec1)-exp(lext1))*dts_se)))-exp(lext1)))/
-          exp((exp(lfec1)-exp(lext1))*dts_se),
-      p   = rate2prob(exp(lsmp1),dts),
+      ext = extin1,
+      gam = gamin1,
+      p   = sampin1,
       u1,n1,v1,d1);
 
     ll2 <- pradel_unvd_gam(
-      ext = (exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/
-          (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2)),
-      gam = (1-(exp(lext2)*((exp((exp(lfec2)-exp(lext2))*dts_se))-1))/
-           (exp(lfec2)*((exp((exp(lfec2)-exp(lext2))*dts_se)))-exp(lext2)))/
-          exp((exp(lfec2)-exp(lext2))*dts_se),
-      p   = rate2prob(exp(lsmp2),dts),
+      ext = extin2,
+      gam = gamin2,
+      p   = sampin2,
       u2,n2,v2,d2);
 
     if (is.infinite(ll1$LogL)){ll1$LogL = -Inf};
@@ -378,10 +415,10 @@ make_BayesCMR_2clades <- function(Obs1,Obs2,dts=rep(1,dim(Obs1)[2]),
   # THis is actually the same for drivers; they can not be assumed to have
   # the same impact on both clades. This could potentially be done by
   # some meedling of the index array, but leave for later.
-  out <- list(probfun = probfun, likfun = myll,Clade1Mod = m1, Clade2Mod = m2,
+  out <- list(probfun = probfun, likfun = myll,Clade1Mod = m1, Clade2Mod = m2,driverinx =drivinx,
               lspecfun1 = lspecfun1,lextfun1=lextfun1,lsampfun1=lsampfun1,
               lspecfun2 = lspecfun2,lextfun2=lextfun2,lsampfun2=lsampfun2,
-              inx = inx,npar = max(unlist(inx)),date=date());
+              inx = inx,npar = max(unlist(inx)),date=date(),modeltype=modeltype);
 
   attr(out,"class")<-"CMR_model"
   return(out)

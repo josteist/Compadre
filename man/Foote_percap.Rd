@@ -4,15 +4,15 @@
 \alias{Foote_percap}
 \title{Function to calculate Foote's rates of macroevolutionary change.}
 \usage{
-Foote_percap(Obs, dts)
+Foote_percap(Obs, dts = rep(1, dim(Obs)[2]))
 }
 \arguments{
-\item{Obs}{matrix of observations (species by time)}
+\item{Obs}{matrix of observations (taxa by time)}
 
-\item{dts}{vector of interval durations}
+\item{dts}{vector of interval durations (defaults to 1)}
 }
 \value{
-p_hat,q_hat, N_b_t, N_t,N_b
+lambda,mu, bottomboundcros, topboundcros, rangethrough
 }
 \description{
 Function to calculate Foote's rates of macroevolutionary change.

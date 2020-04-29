@@ -42,7 +42,7 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
       tmpm1 <- make_BayesCMR(cmrModel$Clade1Mod$Obs,cmrModel$Clade1Mod$dts)
       tmpm2 <- make_BayesCMR(cmrModel$Clade2Mod$Obs,cmrModel$Clade2Mod$dts)
       xtmp1<-optim(c(-1.1,-1.2,-1),function(x){-tmpm1$probfun(x)})$par
-      xtmp2<-optim(c(-1.1,-1.2,-1),function(x){-tmpm1$probfun(x)})$par #-cmrModel$Clade2Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade2Mod$npar-3)))})$par
+      xtmp2<-optim(c(-1.1,-1.2,-1),function(x){-tmpm2$probfun(x)})$par #-cmrModel$Clade2Mod$probfun(c(x[1],x[2],x[3],rep(0,cmrModel$Clade2Mod$npar-3)))})$par
 
       x0 = c(xtmp1,rep(0,cmrModel$Clade1Mod$npar-3),
              xtmp2,rep(0,cmrModel$Clade2Mod$npar-3),

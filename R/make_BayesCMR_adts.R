@@ -302,7 +302,7 @@ make_BayesCMR_adts <- function(Obs,dts=rep(1,dim(Obs)[2]),
 
     ll <- pradel_unvd_gam(
       ext = sapply(1:(length(dts)-1),function(ii){
-        (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii]))-1))/
+          (exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii]))-1))/
           (exp(lfec[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii])))-exp(lext[ii]))}),
       gam <- sapply(1:(length(dts)-1),function(ii){
         (1-(exp(lext[ii])*((exp((exp(lfec[ii])-exp(lext[ii]))*dts[ii]))-1))/

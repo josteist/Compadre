@@ -15,6 +15,7 @@ make_BayesCMR_2clades(
   ext2 = ~time,
   samp2 = ~time,
   pfix = 2,
+  modeltype = "IV",
   data = NULL,
   ...
 )
@@ -27,6 +28,8 @@ make_BayesCMR_2clades(
 \item{dts}{a vector of interval durations. Defaults to series of 1's if not given.}
 
 \item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.}
+
+\item{modeltype}{Which parameterization of the likelihood functino to be used. See ?Compadre for details. Defaults to 'IV'}
 
 \item{data}{data frame of possible external drivers.}
 

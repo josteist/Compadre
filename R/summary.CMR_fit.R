@@ -7,6 +7,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
   # Output mean,p2.5,p50,p97.5,p>/<(cmrfit$Chain)[1]/2,
   if (is.null(cmrfit$Model$Clade1Mod)){
     # Single clade model
+
     smp <- round(seq(dim(cmrfit$Chain)[1]/2,
                      dim(cmrfit$Chain)[1],length.out=nsamp))
 
@@ -16,8 +17,13 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$specInx[ii]];
       tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$specInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam[[ii]] = 'Overall rate';
+        if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+          tmp = exp(tmp);
+          tmpnam[[ii]] = 'Overall rate';
+        } else {
+          tmp = 1/(1+exp(-tmp));
+          tmpnam[[ii]] = 'Overall probability'
+        }
       }
       tmpspec[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]]))
     }
@@ -30,32 +36,54 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$extInx[ii]];
       tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$extInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam[[ii]] = 'Overall rate';
+        if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+          tmp = exp(tmp);
+          tmpnam[[ii]] = 'Overall rate';
+        } else {
+          tmp = 1/(1+exp(-tmp));
+          tmpnam[[ii]] = 'Overall probability'
+        }
       }
       tmpext[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]]))
     }
     colnames(tmpext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmpext) <- tmpnam;
-  ## == SAMPLING
+    ## == SAMPLING
     tmpsamp <- array(NA,c(length(cmrfit$Model$inx$sampInx),6))
     tmpnam <- c()
     for (ii in 1:length(cmrfit$Model$inx$sampInx)){
       tmp <- cmrfit$Chain[smp,cmrfit$Model$inx$sampInx[ii]];
       tmpnam[[ii]] <- noquote(names(cmrfit$Model$inx$sampInx)[[ii]]);
       if (ii==1){
-        tmp = exp(tmp);
-        tmpnam[[ii]] = 'Overall rate';
+        if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+          tmp = exp(tmp);
+          tmpnam[[ii]] = 'Overall rate';
+        } else {
+          tmp = 1/(1+exp(-tmp));
+          tmpnam[[ii]] = 'Overall probability'
+        }
       }
       tmpsamp[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]]))
     }
     colnames(tmpsamp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmpsamp) <- tmpnam;
-    writeLines("\t \t \t=== Speciation rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Speciation rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Seniority probability - logit model ===")
+    }
     print(tmpspec,digits=3)
-    writeLines("\t \t \t=== Extinction rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Extinction rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Extinction probability - logit model ===")
+    }
     print(tmpext,digits=3)
-    writeLines("\t \t \t=== Sampling rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Sampling rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Sampling probability - logit model ===")
+    }
     print(tmpsamp,digits=3)
     out = list(SpecStat=tmpspec,
                ExtStat =tmpext,
@@ -167,18 +195,29 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
 
 
 
-
-    writeLines("\t \t \t=== Speciation rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Speciation rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Seniority probability - logit model ===")
+    }
     writeLines("\t \t \t Clade 1")
     print(tmp1spec,digits=3)
     writeLines("\t \t \t Clade 2")
     print(tmp2spec,digits=3)
-    writeLines("\t \t \t=== Extinction rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Extinction rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Extinction probabiliry - logit model ===")
+    }
     writeLines("\t \t \t Clade 1")
     print(tmp1ext,digits=3)
     writeLines("\t \t \t Clade 2")
     print(tmp2ext,digits=3)
-    writeLines("\t \t \t=== Sampling rate parameters ===")
+    if (cmrfit$Model$modeltype %in% c('I','II','III','IV')){
+      writeLines("\t \t \t=== Sampling rate parameters ===")
+    } else {
+      writeLines("\t \t \t=== Sampling probability - logit model ===")
+    }
     writeLines("\t \t \t Clade 1")
     print(tmp1samp,digits=3)
     writeLines("\t \t \t Clade 2")

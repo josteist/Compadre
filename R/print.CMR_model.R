@@ -6,6 +6,7 @@ print.CMR_model <- function(mod){
     cat(' spanning ',dim(mod$Obs)[2],' intervals. \n')
     cat('The model was generated',mod$date)
     cat(' and has', mod$npar,'parameters.\n')
+    cat('Model is of type ',mod$modeltype,'. See ?make_BayesCMR for details.')
     cat('\n')
 
     # If only 1 clade model
@@ -22,7 +23,9 @@ print.CMR_model <- function(mod){
     cat(' spanning ',dim(mod$Clade1Mod$Obs)[2],' intervals. \n')
     cat('The model was generated',mod$date)
     cat(' and has', mod$npar,'parameters.\n')
+    cat('Model is of type ',mod$modeltype,'. See ?make_BayesCMR for details.')
     cat('\n')
+
 
     # If only 1 clade model
     cat(' ==  Model terms  == \n')
