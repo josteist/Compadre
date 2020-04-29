@@ -18,14 +18,14 @@
 #' matplot(fit$Chain[,1:3],type="l")
 
 make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
-         spec =  ~ 1,
-         ext  =  ~ 1,
-         samp =  ~ 1,
-         data = NULL,
-         pfix=2,
-         priorsNorm_Cov=c(0,2),
-         priorsNorm_Mus = rep(list(c(-4,4)),3),
-         priorsUnif=c(-3,3),replRE_1 = F,modeltype='IV'){
+                          spec =  ~ 1,
+                          ext  =  ~ 1,
+                          samp =  ~ 1,
+                          data = NULL,
+                          pfix=2,
+                          priorsNorm_Cov=c(0,2),
+                          priorsNorm_Mus = rep(list(c(-4,4)),3),
+                          priorsUnif=c(-3,3),replRE_1 = F,modeltype='IV'){
   # Model generating function for a Compadre analysis.
   # Minimum input is a matrix of observed/unobserved of dimensions
   # taxa by temporal interval. dts is vector of interval
@@ -304,8 +304,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   probfun <- function(x){myll(x)$LogL+sum(unlist(prfun(x)))}
 
   out <- list(probfun= probfun,likfun=myll,priorf  = prfun,
-              npar = npar,
-              specfun = lspecfun,extfun=lextfun,sampfun=lsampfun,inx = alphinx,
+              npar = npar,test = 'dummy2',
+              specfun = lspecfun,extfun=lextfun,sampfun=lsampfun,inx = alphinx,driverinx = inxDriv,
               n_est=n_est,n_norm=n_norm,Obs=Obs,dts=dts,
               date=date(),call=fullcall,modeltype=modeltype,
               mmsamp=mmsamp,mmspec=mmspec_f,mmext=mmext_f,spec = spec,ext = ext,samp=samp)

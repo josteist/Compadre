@@ -18,14 +18,17 @@
 #' matplot(fit$Chain[,1:3],type="l")
 
 make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
-                          spec =  ~ 1,
-                          ext  =  ~ 1,
-                          samp =  ~ 1,
-                          data = NULL,
-                          pfix=2,
-                          priorsNorm_Cov=c(0,2),
-                          priorsNorm_Mus = rep(list(c(-4,4)),3),
-                          priorsUnif=c(-3,3),replRE_1 = F,modeltype='IV'){
+                              spec =  ~ 1,
+                              ext  =  ~ 1,
+                              samp =  ~ 1,
+                              data = NULL,
+                              pfix = 2,
+                              priorMu  = dnorm,
+                              priorCov = dnorm,
+                              priorStd = dunif,
+                              priorPars = list(list(-4,4),list(0,2),list(-3,3)),
+                              replRE_1 = F,modeltype='IV'){
+
   # Model generating function for a Compadre analysis.
   # Minimum input is a matrix of observed/unobserved of dimensions
   # taxa by temporal interval. dts is vector of interval
@@ -48,17 +51,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       stop("Size of data frame with drivers does not match dimension of Obs.")
     }
   }
-  nprs1 <- priorsNorm_Cov; # prior pars. for drivers
-  if (length(priorsNorm_Mus)==3){
-    # then it's a list of length three, most likely one set of pars for each
-    nprs2 <- priorsNorm_Mus; # prior pars. for mean rates.
-  } else if (length(priorsNorm_Mus)==2){
-    # then just two, and should be repeated
-    nprs2 <- rep(list(priorsNorm_Mus),3)
-  }
 
-  #All normal priors are µ=0 and sd=10
-  priun<- priorsUnif;
   undv <- make_unvd(Obs);
   u = undv$u;
   v = undv$v;
@@ -290,21 +283,20 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   }
   inxDriv = seq(4,length.out=dim(mmspec)[2]+ dim(mmext)[2]+dim(mmsamp)[2]-3) # index into 'drivers' non intercepts.
   if (any(RE)){
-    prfun <- function(x){
-      c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
-        dunif(x[alphinx$varInx],min=priorsUnif[1],priorsUnif[2],log=T),
-        sapply(inxDriv,function(ii){dnorm(x[ii],priorsNorm_Cov[1],priorsNorm_Cov[2],log=T)}),
-        sapply(1:sum(RE),function(ii){dnorm(   x[alphinx[[4+which(RE)[ii]]]],0,exp(x[alphinx$varInx[ii]]),log=T)}))}
-  } else {
-    prfun <- function(x){
-      c(sapply(1:3,function(ii){dnorm(x[ii],priorsNorm_Mus[[ii]][1],priorsNorm_Mus[[ii]][2],log=T)}),
-        sapply(inxDriv,function(ii){dnorm(x[ii],priorsNorm_Cov[1],priorsNorm_Cov[2],log=T)}))}
+
+    prfun <- function(x){unlist(c(sapply(1:3,function(ii){do.call(priorMu, c(x[ii],priorPars[[1]],log=T))}),
+                                  sapply(inxDriv,function(ii){do.call(priorCov,c(x[ii],priorPars[[2]],log=T))}),
+                                  sapply(alphinx$varInx,function(ii){do.call(priorStd,c(x[ii],priorPars[[3]],log=T))}),
+                                  sapply(1:sum(RE),function(ii){dnorm(   x[alphinx[[4+which(RE)[ii]]]],0,exp(x[alphinx$varInx[ii]]),log=T)})))}
+  } else { # no random effects, i.e. no varinx
+    prfun <- function(x){unlist(c(sapply(1:3,function(ii){do.call(priorMu, c(x[ii],priorPars[[1]],log=T))}),
+                                  sapply(inxDriv,function(ii){do.call(priorCov,c(x[ii],priorPars[[2]],log=T))})))}
   }
 
   probfun <- function(x){myll(x)$LogL+sum(unlist(prfun(x)))}
 
   out <- list(probfun= probfun,likfun=myll,priorf  = prfun,
-              npar = npar,test = 'dummy2',
+              npar = npar,test = 'dummy',
               specfun = lspecfun,extfun=lextfun,sampfun=lsampfun,inx = alphinx,driverinx = inxDriv,
               n_est=n_est,n_norm=n_norm,Obs=Obs,dts=dts,
               date=date(),call=fullcall,modeltype=modeltype,
