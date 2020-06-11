@@ -15,8 +15,10 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
   # thus boundaries are max_ma+c(0,cumsum(cmrfit$Model$dts))
   # also store par(stuff) and return settings to old after plott.
   # plpars <- par();
+  if (drawplot){
   olp <- par(no.readonly = TRUE);
   on.exit(par(olp))
+  }
   if (!is.null(stages)){
     # If stages are given, take the max as the xmax
     max_ma = max(stages$max_ma)
@@ -224,7 +226,7 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
           # axis(1,at=bnds[round(seq(1,length(bnds),length.out=5))])
         } else {
           # MAKE THE SHADING HERE...
-          plot(1000,1000,         xlim = c(max(bnds)+3,min(bnds-3)),xaxt='n',ylab='Extinction rate',
+          plot(1000,1000,         xlim = c(max(bnds)+3,min(bnds-3)),xaxt='n',ylab='Extinction probability',
                ylim=c(               ylim=c(min(tmp)*0.9,max(tmp)*1.1)))
 
           for (ii in 1:dim(stages)[1]){

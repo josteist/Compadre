@@ -6,7 +6,7 @@
 \usage{
 remake_fosrec(sim = sim, samp = function(t, n) {
     0.01
-}, newdts = NULL)
+})
 }
 \arguments{
 \item{sim}{sets the type parameterization of the rates of speciation and extinction. 'I' and 'II' specifies that the probabilities of extinction and seniority are calculated based on actual durations of intervals, whereas 'III' and 'IV' uses the differences between mid-points of intervals. 'I' and 'III' uses a basic implementation of probability of extinction as 1 - exp(-rate * dt). Models 'II' and 'IV' use a more detailed functional relationship between rate and probability, following Raup (1984):  (µ*((exp((lambda-µ)*dt))-1))/(lambda*((exp((lambda-µ)*dt)))-µ). Modeltype 'V' implements a temporally uninformed model, estimating the probabilities directly (or rather their logit).}

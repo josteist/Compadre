@@ -5,39 +5,23 @@
 #' @export
 
 # Making a function to 'resample' a full set of taxa from a simulation
-remake_fosrec <- function(sim = sim, samp = function(t,n){0.01},newdts=NULL){
+remake_fosrec <- function(sim = sim, samp = function(t,n){0.01}){
   sim_out = sim;
   Foss <- lapply(1:dim(sim$Taxa)[1], function(ii) {
     sampFosRec(sim$Taxa[ii, 1], sim$Taxa[ii, 2], samp)
   })
-  if (is.null(newdts)){
-    FosRec <- array(0, c(sum(sapply(Foss, length) > 0), length(sim$dts)))
-    tix = 1
-    for (jj in which(sapply(Foss, length) > 0)) {
-      FosRec[tix, rle(sort(sapply(Foss[[jj]], function(ii) {
-        which(ii < cumsum(sim$dts))[1]
-      })))$values] <- rle(sort(sapply(Foss[[jj]], function(ii) {
-        which(ii < cumsum(sim$dts))[1]
-      })))$lengths
-      tix = tix + 1
-    }
-  } else {
-    # new temporal divisions; assuming it covers the same period
-    FosRec <- array(0, c(sum(sapply(Foss, length) > 0), length(sim$dts)))
-    tix = 1
-    for (jj in which(sapply(Foss, length) > 0)) {
-      FosRec[tix, rle(sort(sapply(Foss[[jj]], function(ii) {
-        which(ii < cumsum(newdts))[1]
-      })))$values] <- rle(sort(sapply(Foss[[jj]], function(ii) {
-        which(ii < cumsum(newdts))[1]
-      })))$lengths
-      tix = tix + 1
-    }
-    sim_out$dts = newdts
+  FosRec <- array(0, c(sum(sapply(Foss, length) > 0), length(sim$dts)))
+  tix = 1
+  for (jj in which(sapply(Foss, length) > 0)) {
+    FosRec[tix, rle(sort(sapply(Foss[[jj]], function(ii) {
+      which(ii < cumsum(sim$dts))[1]
+    })))$values] <- rle(sort(sapply(Foss[[jj]], function(ii) {
+      which(ii < cumsum(sim$dts))[1]
+    })))$lengths
+    tix = tix + 1
   }
   sim_out$Foss = Foss;
   sim_out$FosRec = FosRec;
   sim_out$Samp = samp;
-
   return(sim_out)
 }

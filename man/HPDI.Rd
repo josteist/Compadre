@@ -8,12 +8,12 @@ HPDI corresponds to the 'shortest' intervals that contain p fraction of the samp
 HPDI(x, p = 0.95)
 }
 \arguments{
-\item{x}{Samples of one parameter.}
+\item{x}{Samples of one parameter or a CMR_fit.}
 
 \item{p}{probability. Defaults to 0.95.}
 }
 \value{
-returns hpdi and exact probability of the interval
+returns hpdi and exact probability of the interval, either for the given sample or for each parameter in a CMR_fit.
 }
 \description{
 Function to extract highest posterior density intervals.

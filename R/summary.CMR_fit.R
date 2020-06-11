@@ -5,6 +5,8 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
   # quick stats function for a named variable.
   # Ideally this should also store the output as a matrix or dframe
   # Output mean,p2.5,p50,p97.5,p>/<(cmrfit$Chain)[1]/2,
+
+  # ESS is drawn from the second half of the chain, other stats are from nsamp draws from the chain.
   if (is.null(cmrfit$Model$Clade1Mod)){
     # Single clade model
 
