@@ -15,9 +15,9 @@ make_BayesCMR(
   priorMu = dnorm,
   priorCov = dnorm,
   priorStd = dunif,
-  priorPars = list(list(-4, 4), list(0, 2), list(-3, 3)),
+  priorPars = list(list(log(0.1), 5), list(0, 5), list(-3, 3)),
   replRE_1 = F,
-  modeltype = "IV"
+  modeltype = "III"
 )
 }
 \arguments{
