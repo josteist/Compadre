@@ -12,7 +12,7 @@ MCMC_CMR(
   draweps = niter/noblc,
   noblc = 100,
   x0 = NULL,
-  cvstp = (2.38/(sqrt(cmrModel$npar)))^2 * diag(vmin, cmrModel$npar),
+  cvstp = (2.38/(sqrt(cmrModel$npar)))^2 * diag(1, cmrModel$npar),
   adapt = TRUE
 )
 }

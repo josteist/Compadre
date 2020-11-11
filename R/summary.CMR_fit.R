@@ -27,7 +27,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
           tmpnam[[ii]] = 'Overall probability'
         }
       }
-      tmpspec[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]]))
+      tmpspec[ii,] = c(mean(tmp),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$specInx[ii]]))
     }
     colnames(tmpspec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmpspec) <- tmpnam;
@@ -46,7 +46,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
           tmpnam[[ii]] = 'Overall probability'
         }
       }
-      tmpext[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]]))
+      tmpext[ii,] = c(mean(tmp),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$extInx[ii]]))
     }
     colnames(tmpext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmpext) <- tmpnam;
@@ -65,7 +65,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
           tmpnam[[ii]] = 'Overall probability'
         }
       }
-      tmpsamp[ii,] = c(mean(tmp),           quantile(tmp,c(0.025,0.5,0.975)),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]]))
+      tmpsamp[ii,] = c(mean(tmp),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp*(sign(mean(tmp)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$sampInx[ii]]))
     }
     colnames(tmpsamp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmpsamp) <- tmpnam;
@@ -108,7 +108,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp1 = exp(tmp1);
         tmp1nam[[ii]] = 'Overall rate';
       }
-      tmp1spec[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$specInx[ii]]))
+      tmp1spec[ii,] = c(mean(tmp1),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$specInx[ii]]))
     }
     colnames(tmp1spec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp1spec) <- tmp1nam;
@@ -122,7 +122,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp1 = exp(tmp1);
         tmp1nam[[ii]] = 'Overall rate';
       }
-      tmp1ext[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$extInx[ii]]))
+      tmp1ext[ii,] = c(mean(tmp1),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$extInx[ii]]))
     }
     colnames(tmp1ext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp1ext) <- tmp1nam;
@@ -136,7 +136,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp1 = exp(tmp1);
         tmp1nam[[ii]] = 'Overall rate';
       }
-      tmp1samp[ii,] = c(mean(tmp1),           quantile(tmp1,c(0.025,0.5,0.975)),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$sampInx[ii]]))
+      tmp1samp[ii,] = c(mean(tmp1),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp1*(sign(mean(tmp1)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx1$sampInx[ii]]))
     }
     colnames(tmp1samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp1samp) <- tmp1nam;
@@ -155,7 +155,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp2 = exp(tmp2);
         tmp2nam[[ii]] = 'Overall rate';
       }
-      tmp2spec[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$specInx[ii]]))
+      tmp2spec[ii,] = c(mean(tmp2),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$specInx[ii]]))
     }
     colnames(tmp2spec) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp2spec) <- tmp2nam;
@@ -169,7 +169,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp2 = exp(tmp2);
         tmp2nam[[ii]] = 'Overall rate';
       }
-      tmp2ext[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$extInx[ii]]))
+      tmp2ext[ii,] = c(mean(tmp2),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$extInx[ii]]))
     }
     colnames(tmp2ext) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp2ext) <- tmp2nam;
@@ -183,7 +183,7 @@ summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
         tmp2 = exp(tmp2);
         tmp2nam[[ii]] = 'Overall rate';
       }
-      tmp2samp[ii,] = c(mean(tmp2),           quantile(tmp2,c(0.025,0.5,0.975)),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$sampInx[ii]]))
+      tmp2samp[ii,] = c(mean(tmp2),           c(HPDI(tmp)$hpdi[1],median(tmp),HPDI(tmp)$hpdi[2]),sum(tmp2*(sign(mean(tmp2)))<0)/length(smp),coda::effectiveSize(cmrfit$Chain[-c(1:(dim(cmrfit$Chain)[1]/2)),cmrfit$Model$inx$inx2$sampInx[ii]]))
     }
     colnames(tmp2samp) <- c("mean",                     "2.5%",                     "median",                     "97.5%",                     "p >/<0 ",                     "Eff SS")
     rownames(tmp2samp) <- tmp2nam;

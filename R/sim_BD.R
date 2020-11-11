@@ -12,17 +12,22 @@
 #' @export
 
 sim_BD <- function(spec=0.1,
-                           ext=0.02,
-                           samp = 0.3,
-                           n_init=100,dt_ints=rep(1,10)){
+                   ext=0.02,
+                   samp = 0.3,
+                   n_init=100,dt_ints=rep(1,10)){
   # Simulating a birth death process with spec and ext
   # as functions of (time, n_species now). Output
   # is matrix of origination and extinction times. Speciation is budding.
   #
-  if (any(sapply(list(spec,ext,samp),function(ii){typeof(ii) == "closure"}))){
-    # If any of the rates depend on time  then do simulation with incremental time. If the rates
+  if (any(sapply(list(spec,ext),function(ii){class(ii) == "function"}))){
+    # If any of the biological rates depend on time  then do simulation with incremental time. If the rates
     # are fixed, the approach is 'waiting time' based, see below
-
+    if (class(spec)!='function'){
+      spec_tmp = spec;
+      spec <- function(t,n){spec_tmp}}
+    if (class(ext) !='function'){
+      ext_tmp = ext;
+      ext  <- function(t,n){ext_tmp}}
     Times = array(NA,c(n_init*1000,2));
     # Collect times here [start, end]
     Times[1:n_init,1] = 0;
@@ -94,11 +99,11 @@ sim_BD <- function(spec=0.1,
       waitingtimes <- cbind(rexp(length(alive),rate = l),rexp(length(alive),rate = m))
       event <- which.min(c(min(waitingtimes[,1]),min(waitingtimes[,2])))
       t = t+min(waitingtimes)
-      if (t>tmax){break}
+      if (t>=tmax){break}
       # print(event)
-      if (length(alive)==0){
-        t = tmax
-      }
+      # if (length(alive)==0){
+      #   t = tmax
+      # }
 
       if (event==1){
         # birth
@@ -109,9 +114,14 @@ sim_BD <- function(spec=0.1,
           taxa = rbind(taxa,array(NA,dim=c(n_init^2,2)))
         }
       } else if (event==2){
-        dies <- sample(alive,1);
+        if (length(alive)>1){
+          dies <- sample(alive,1);
+        } else {
+          dies = alive; # if only 1 lest, sample interprets this as pick from 1:inx
+        }
         taxa[dies,2] = t;
         alive <- setdiff(alive,dies);
+        if (length(alive)==0){t = tmax}
       }
     }
 

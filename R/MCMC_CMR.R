@@ -16,7 +16,7 @@
 MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
                          draweps=niter/noblc,noblc = 100,
                          x0=NULL,
-                         cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar),
+                         cvstp = (2.38/(sqrt(cmrModel$npar)))^2*diag(1,cmrModel$npar),
                          adapt=TRUE){
   # Perhaps this works better if we ignore the 'covariance' part in the early phase (since most is prob directional anyways) and introduce it
   # Adaptive MCMC approach, tuning the stps to the covariance of the
@@ -91,7 +91,8 @@ MCMC_CMR <- function(cmrModel,niter=1e4,nthin=10,vmin=1e-5,
       # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)  +
                                                  # diag(vmin,cmrModel$npar))
       # Testing 301019, instead of +vmin, do pmax(vmin)
-      cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)) + diag(vmin,cmrModel$npar);
+      # cvstp <- (2.38/(sqrt(cmrModel$npar)))^2*(cov(tmp_X)) + diag(vmin,cmrModel$npar);
+      cvstp <- (2.4^2/(cmrModel$npar))*(cov(tmp_X)) + diag(vmin,cmrModel$npar);
       # diag(cvstp) <- pmax(diag(cvstp),vmin)
 
 

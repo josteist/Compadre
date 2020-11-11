@@ -1,5 +1,9 @@
 #' @export
 plot.CMR_fit <- function(fit,drawplot=TRUE,...){
+  if (drawplot){
+    olp <- par(no.readonly = TRUE);
+    on.exit(par(olp))
+  }
   # simple wrapper to plot both the rates and the drivers.
   # a switch, if only three rates (i.e. no RE's or drivers, then just plot the density of the posterior)
   if (is.null(fit$Model$Clade1Mod)){ #If not interacting clades

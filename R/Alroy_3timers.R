@@ -27,9 +27,11 @@ Alroy_3timers <- function(Obs,dts=rep(1,dim(Obs)[2])){
   # So we want these for each interval (though first and last will
   # not compute)
 
-  twotimers <- c(0,sapply(2:(dim(Obs)[2]-1),
+  # twotimers <- c(0,sapply(2:(dim(Obs)[2]-1),
+  #                         function(ii){sum(apply(Obs[,(ii-1):(ii)],1,prod))}),0)
+  #                             # sum(apply(Obs[,(ii):(ii+1)],1,prod))}),0)
+  twotimers <- c(0,sapply(2:(dim(Obs)[2]),
                           function(ii){sum(apply(Obs[,(ii-1):(ii)],1,prod))}),0)
-                              # sum(apply(Obs[,(ii):(ii+1)],1,prod))}),0)
   threetimers <- c(0,sapply(2:(dim(Obs)[2]-1),
                             function(ii){sum(apply(Obs[,(ii-1):(ii+1)],1,prod))}),0)
   parttimers <- c(0,sapply(2:(dim(Obs)[2]-1),function(ii){
@@ -42,12 +44,11 @@ Alroy_3timers <- function(Obs,dts=rep(1,dim(Obs)[2])){
   mu <- sapply(1:dim(Obs)[2],function(ii){
     (log(twotimers[ii]/threetimers[ii]) + log(Ps[ii+1]))*(1/dts[ii])})
   names(lambda) <- names(mu)
-  lambda_2 <- c(sapply(1:dim(Obs)[2],function(ii){
-    (log(twotimers[ii+1]/threetimers[ii]) + log(Ps2))*(1/dts[ii])}))
-  mu_2 <- sapply(1:dim(Obs)[2],function(ii){
-    (log(twotimers[ii]/threetimers[ii]) + log(Ps2))*(1/dts[ii])})
+  lambda_2 <- c(NA,log(twotimers[-c(1,2)]/threetimers[-1]))*(1/dts)
+  mu_2 <- c(NA,log(twotimers[-c(1,dim(Obs)[2]+1)]/threetimers[-1]))*(1/dts)
 
-    out <- list(twotimers = twotimers,threetimers=threetimers,parttimers=parttimers,
+
+  out <- list(twotimers = twotimers,threetimers=threetimers,parttimers=parttimers,
               SamplingProb = Ps,mu= mu, lambda=unlist(lambda),
               SamplingProb2 = Ps2,mu2= mu_2, lambda2=unlist(lambda_2))
   return(out)
