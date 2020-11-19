@@ -36,7 +36,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
 
   # Dts are in this version difference between mid-poitns of intervals for spec/ext and true dts for samp.
   dts_se <- dts[-1]/2 + dts[-length(dts)]/2
-
+  datacopy = data;
   # Current version implements paraclade extinction and growth from Raup 1984
   # used to get seniority and extinction. Current version 26.03.2019
 
@@ -60,7 +60,6 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
 
   prior <- list(); #making all prior terms part of this list.
   prix = 1; # ticker for prior parts.
-
   origdata = data;
   # normalizing data
   # If last entry (stage) is included in the data.frame, must be removed from normalization for the Speciation/extinction drivers
@@ -70,8 +69,9 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       dataSE = as.data.frame(apply(data[-length(dts),] ,2,normfun))
       data   = as.data.frame(apply(data,2,normfun))
     } else {
-      dataSE = as.data.frame(normfun(data[-length(dts)]))
-      dataSE = as.data.frame(normfun(data))
+      dataSE = as.data.frame(normfun(data[-length(dts),]))
+      colnames(dataSE) <- colnames(data)
+      data   = as.data.frame(apply(data,2,normfun))
     }
   } else {
     dataSE = data.frame(tmp=rep(0,length(dts)-1));
@@ -243,7 +243,6 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
       lextfun <- function(x){rowSums(cbind(mmext %*% x[alphinx$extInx], Zext %*% x[alphinx$extReInx]))}
     }
   }
-
   # Defining the likelihoodfunction.
   myll <- function(x){
     lfec = lspecfun(x);
@@ -281,6 +280,35 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     return(ll)
 
   }
+  # Defining a function to transform rates to probabilities
+  pradel_probs <- function(x){
+    lfec = lspecfun(x);
+    lext = lextfun(x);
+    lsmp = lsampfun(x);
+    if (modeltype=='I'){
+      extin <- 1-exp(-exp(lext)*dts[-length(dts)])
+      gamin <- (exp(-exp(lext)*dts[-length(dts)]))/(exp((exp(lfec)-exp(lext))*dts[-length(dts)]))
+      sampin <- rate2prob(exp(lsmp),dts)
+    } else if (modeltype == 'II'){
+      extin <-    (exp(lext)*((exp((exp(lfec)-exp(lext))*dts[-length(dts)]))-1))/        (exp(lfec)*((exp((exp(lfec)-exp(lext))*dts[-length(dts)])))-exp(lext))
+      gamin <- (1-(exp(lext)*((exp((exp(lfec)-exp(lext))*dts[-length(dts)]))-1))/        (exp(lfec)*((exp((exp(lfec)-exp(lext))*dts[-length(dts)])))-exp(lext)))/        exp((exp(lfec)-exp(lext))*dts[-length(dts)])
+      sampin <- rate2prob(exp(lsmp),dts)
+    } else if (modeltype == 'III'){
+      extin <- 1-exp(-exp(lext)*dts_se)
+      gamin <- (exp(-exp(lext)*dts_se))/(exp((exp(lfec)-exp(lext))*dts_se))
+      sampin <- rate2prob(exp(lsmp),dts)
+    } else if (modeltype == 'IV'){
+      extin <- (exp(lext)*((exp((exp(lfec)-exp(lext))*dts_se))-1))/        (exp(lfec)*((exp((exp(lfec)-exp(lext))*dts_se)))-exp(lext))
+      gamin <- (1-(exp(lext)*((exp((exp(lfec)-exp(lext))*dts_se))-1))/        (exp(lfec)*((exp((exp(lfec)-exp(lext))*dts_se)))-exp(lext)))/        exp((exp(lfec)-exp(lext))*dts_se)
+      sampin <- rate2prob(exp(lsmp),dts)
+    } else if (modeltype == 'V'){
+      extin <- exp(lext)/(exp(lext)+1)
+      gamin <- exp(lfec)/(exp(lfec)+1)
+      sampin <- exp(lsmp)/(exp(lsmp)+1)
+    }
+    return(list(extprobs = extin,gamprobs=gamin,samprobs=sampin))
+  }
+
   inxDriv = seq(4,length.out=dim(mmspec)[2]+ dim(mmext)[2]+dim(mmsamp)[2]-3) # index into 'drivers' non intercepts.
   if (any(RE)){
 
@@ -300,7 +328,8 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
               specfun = lspecfun,extfun=lextfun,sampfun=lsampfun,inx = alphinx,driverinx = inxDriv,
               n_est=n_est,n_norm=n_norm,Obs=Obs,dts=dts,
               date=date(),call=fullcall,modeltype=modeltype,
-              mmsamp=mmsamp,mmspec=mmspec_f,mmext=mmext_f,spec = spec,ext = ext,samp=samp)
+              mmsamp=mmsamp,mmspec=mmspec_f,mmext=mmext_f,spec = spec,ext = ext,samp=samp,
+              pradel_probs = pradel_probs,origdata = origdata)
   # Zsmp = Zsamp, Zspc = Zspec, Zext = Zext,dataSE = dataSE,
   # inxDriv = inxDriv,RE = RE);
   attr(out,"class")<-"CMR_model"
