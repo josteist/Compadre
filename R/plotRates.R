@@ -10,7 +10,7 @@
 #' @return returns a list of three matrices with sampled rates; $SpecRates, $ExtRates and $SampRates.
 #' @export
 
-plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,quantiles = c(0.025,0.5,0.975),drawplot=TRUE,cladenames=NULL){
+plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,quantiles = c(0.025,0.5,0.975),drawplot=TRUE,cladenames=NULL,lbs=NULL,...){
   # have max_ma as input instead of stgs, and possibly a list of colors.
   # thus boundaries are max_ma+c(0,cumsum(cmrfit$Model$dts))
   # also store par(stuff) and return settings to old after plott.
@@ -71,7 +71,7 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
           lines(bnds[-c(1,length(bnds))],tmp[2,],
                 type="o",lty=0,col='black',pch=19)
         }
-
+        if (!is.null(lbs)){mtext(lbs[1],side=2,line=2,las=2,at=max(tmp)*1.1)}
         for (ii in 1:dim(tmp)[2]){
           lines(rep(bnds[ii+1],2),
                 tmp[c(1,3),ii])
@@ -119,6 +119,7 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
                 tmp[c(1,3),ii])
         }
         abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
+        if (!is.null(lbs)){mtext(lbs[2],side=2,line=2,las=2,at=max(tmp)*1.1)}
       }
 
       # sampling quantiles
@@ -166,7 +167,7 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
                 tmp[c(1,3),ii])
         }
         abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
-
+        if (!is.null(lbs)){mtext(lbs[3],side=2,line=2,las=2,at=max(tmp)*1.1)}
         if (!is.null(stages)){
           colbottom(stages)
         }
@@ -208,6 +209,8 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
                 tmp[c(1,3),ii])
         }
         abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
+        if (!is.null(lbs)){mtext(lbs[1],side=2,line=2,las=2,at=max(tmp)*1.1)}
+
       }
 
 
@@ -243,6 +246,8 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
                 tmp[c(1,3),ii])
         }
         abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
+        if (!is.null(lbs)){mtext(lbs[2],side=2,line=2,las=2,at=max(tmp)*1.1)}
+
       }
 
       # sampling quantiles
@@ -280,6 +285,7 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
                 tmp[c(1,3),ii])
         }
         abline(v=bnds,col=rgb(0.1,0.1,0.1,0.1))
+        if (!is.null(lbs)){mtext(lbs[3],side=2,line=2,las=2,at=max(tmp)*1.1)}
 
         if (!is.null(stages)){
           colbottom(stages)
@@ -310,8 +316,8 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
 
     par(mfrow=c(3,1),mar=c(2,4,3,1))
     if (is.null(cladenames)){cladenames = list('Clade 1','Clade 2')}
-    invisible(plotfun_internal(spec_smps1,ext_smps1,smp_smps1,bnds,tmpl,stages,drawplot=drawplot,quantiles=quantiles,main=cladenames[[1]]))
-    invisible(plotfun_internal(spec_smps2,ext_smps2,smp_smps2,bnds,tmpl,stages,drawplot=drawplot,quantiles=quantiles,main=cladenames[[2]]))
+    invisible(plotfun_internal(spec_smps1,ext_smps1,smp_smps1,bnds,tmpl,stages,drawplot=drawplot,quantiles=quantiles,main=cladenames[[1]]),...)
+    invisible(plotfun_internal(spec_smps2,ext_smps2,smp_smps2,bnds,tmpl,stages,drawplot=drawplot,quantiles=quantiles,main=cladenames[[2]]),...)
 
     out <- list(SpecRates1= spec_smps1,ExtRates1 = ext_smps1,SampRates1 = smp_smps1,
                 SpecRates2= spec_smps2,ExtRates2 = ext_smps2,SampRates2 = smp_smps2);

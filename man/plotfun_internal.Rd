@@ -14,7 +14,8 @@ plotfun_internal(
   stages = NULL,
   drawplot = TRUE,
   quantiles = c(0.025, 0.5, 0.975),
-  main = ""
+  main = "",
+  lbs = NULL
 )
 }
 \description{

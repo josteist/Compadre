@@ -12,7 +12,9 @@ plotRates(
   draws = 250,
   quantiles = c(0.025, 0.5, 0.975),
   drawplot = TRUE,
-  cladenames = NULL
+  cladenames = NULL,
+  lbs = NULL,
+  ...
 )
 }
 \arguments{
