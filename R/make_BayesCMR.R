@@ -18,16 +18,16 @@
 #' matplot(fit$Chain[,1:3],type="l")
 
 make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
-                              spec =  ~ 1,
-                              ext  =  ~ 1,
-                              samp =  ~ 1,
-                              data = NULL,
-                              pfix = 2,
-                              priorMu  = dnorm,
-                              priorCov = dnorm,
-                              priorStd = dunif,
-                              priorPars = list(list(log(0.1),5),list(0,5),list(-3,3)),
-                              replRE_1 = F,modeltype='III'){
+                          spec =  ~ 1,
+                          ext  =  ~ 1,
+                          samp =  ~ 1,
+                          data = NULL,
+                          pfix = 2,
+                          priorMu  = dnorm,
+                          priorCov = dnorm,
+                          priorStd = dunif,
+                          priorPars = list(list(log(0.1),5),list(0,5),list(-3,3)),
+                          replRE_1 = F,modeltype='III'){
 
   # Model generating function for a Compadre analysis.
   # Minimum input is a matrix of observed/unobserved of dimensions
@@ -81,7 +81,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   updmmx <- c(F,F,F) # if updating the model matrices for any X (i.e. if diversity is a driver)
   # If mmxxx needs to be updated, i.e. if diversity is a term in any of the rates.
   # SO this fails if not data given and div-dep, since data then doesn't exist properly.
-  if ("div" %in% (attr(terms(spec),"term.labels"))){
+  if ("div" %in% rownames(attr(terms(spec),"factors"))){
     if (is.null(dataSE)){
       dataSE = data.frame(div=rep(0,length(dts)-1))
     } else {
@@ -90,7 +90,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
     updmmx[1] <- TRUE
     # Perhaps have these as lists with indexes instead? If there is an interaction, several rows (not just $div) must be updated!
   }
-  if ("div" %in% (attr(terms(ext),"term.labels"))){
+  if ("div" %in% rownames(attr(terms(ext),"factors"))){
     if (is.null(dataSE)){
       dataSE = data.frame(div=rep(0,length(dts)-1))
     } else {
@@ -100,7 +100,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
   }
 
 
-  if ("div" %in% (attr(terms(samp),"term.labels"))){
+  if ("div" %in% rownames(attr(terms(samp),"factors"))){
     # This is not possible... we can not have diversity estimated affecting the sampling of 'diversity' itself. Throw error
     error('Model with diversity impact on sampling is not possible.')
   }
