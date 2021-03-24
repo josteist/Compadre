@@ -1,5 +1,5 @@
 #' @export
-# make a 'summary' function for a fit.
+# a 'summary' function for a CMR_fit.
 
 summary.CMR_fit <- function(cmrfit,nsamp = 1e4){
   # quick stats function for a named variable.
