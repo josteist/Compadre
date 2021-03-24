@@ -20,34 +20,38 @@ make_BayesCMR(
 )
 }
 \arguments{
-\item{Obs}{a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxa has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
+\item{Obs}{a matrix with size \emph{number of taxa} by \emph{number of intervals (n)}. Each taxon has a row with 0's (unobserved) and 1's (observed) for each interval in the analysis. Oldest interval is first column.}
 
 \item{dts}{a vector of interval durations. Defaults to a series of 1's if not supplied. Oldest interval is first entry.}
 
 \item{data}{a data frame with putative drivers.}
 
-\item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.}
+\item{pfix}{a switch to select which approach is used to solve the identifiability problem in the model. If \code{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \code{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to \code{pfix = 2}}
 
-\item{priorPars}{list of lists of the parameters for the priors: `list(list(paramaters for Mu), list(parameters for covariates), list(parameters for log(standard deviation of random effects)))`. Defaults to list(list(log(0.1),5),list(0,5),list(-3,3))}
+\item{priorPars}{list of lists of the parameters for the priors. First list is parameters for baseline rates, then list of parameters for covariates and third is list of parameters for ln of standard deviation of random effects))). Defaults to \code{list(list(log(0.1),5),list(0,5),list(-3,3))}.}
 
-\item{modeltype}{sets the type parameterization of the rates of speciation and extinction. 'I' and 'II' specifies that the probabilities of extinction and seniority are calculated based on actual durations of intervals, whereas 'III' and 'IV' uses the differences between mid-points of intervals. 'I' and 'III' uses a basic implementation of probability of extinction as 1 - exp(-rate * dt). Models 'II' and 'IV' use a more detailed functional relationship between rate and probability, following Raup (1984):  (µ*((exp((lambda-µ)*dt))-1))/(lambda*((exp((lambda-µ)*dt)))-µ). Modeltype 'V' implements a temporally uninformed model, estimating the probabilities directly (or rather their logit).}
+\item{modeltype}{sets the type parameterisation of the rates of speciation and extinction. 'I' and 'II' specifies that the probabilities of extinction and seniority are calculated based on actual durations of intervals, whereas 'III' and 'IV' uses the differences between mid-points of intervals. 'I' and 'III' uses a basic implementation of probability of extinction as \eqn{1 - exp(-rate * dt)}. Models 'II' and 'IV' use a more detailed functional relationship between rate and probability, following Raup (1984):  (µ*((exp((lambda-µ)*dt))-1))/(lambda*((exp((lambda-µ)*dt)))-µ). Modeltype 'V' implements a temporally uninformed model, estimating the probabilities directly (or rather their logit).}
 
-\item{spec/ext/samp}{are formulas specifying the particular model. Use 'time' for temporally variable rates, 'div' for diversity dependence. Other drivers should have names as entries into \emph{data}}
+\item{spec/ext/samp}{are formulas specifying the particular model. Use \code{spec=~time} for temporally variable rates, \code{spec~div} for diversity dependence. Other drivers should have names as entries into \code{data}}
 
-\item{priorsMu}{distribution used for prior for the baseline rates - a probability density function. Default is dnorm.}
+\item{priorsMu}{distribution used for prior for the baseline rates - a probability density function. Default is \code{dnorm}.}
 
-\item{priorsCov}{distribution used for prior for the driver coefficients - a probability density function. Default is dnorm.}
+\item{priorsCov}{distribution used for prior for the driver coefficients - a probability density function. Default is \code{dnorm}.}
 
-\item{priorsStd}{distribution used for prior for log of the standard deviation of the random effects - a probability density function. Default is dunif.}
+\item{priorsStd}{distribution used for prior for log of the standard deviation of the random effects - a probability density function. Default is \code{dunif}.}
 }
 \value{
-The function returns an object of class CMR_model. This most important output is out$probfun which is a function for the posterior. This output can be fed directly into the sampler \link{MCMC_CMR}. It also returns \emph{Obs} and \emph{dts} as well as the full call (exlcluding default settings), \emph{call}
+The function returns an object of class CMR_model. This most important output is out$probfun which is a function for the posterior. This output can be fed directly into the sampler \link{MCMC_CMR}. It also returns \code{$Obs} and \code{$dts} as well as the full call (exlcluding default settings), \code{$call}
 }
 \description{
 This function generates a structure containing the necessary functions for a CMR analysis of a fossil dataset.
 }
 \examples{
-mod1 <- make.BayesCMR(Obs)
+sim <- sim_BD(ext = function(t,n){0.01+0.03*t},samp = 0.8,n_init = 10)
+plot(sim)
+mod1 <- make.BayesCMR(sim$FosRec>0)
 fit <- MCMC_CMR(mod1)
+plot(fit)
+summary(fit)
 matplot(fit$Chain[,1:3],type="l")
 }
