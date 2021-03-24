@@ -17,25 +17,25 @@ MCMC_CMR(
 )
 }
 \arguments{
-\item{cmrModel}{is a model generated with make_BayesCMR}
+\item{cmrModel}{is a \code{CMR_model} generated using \link{make_BayesCMR}}
 
-\item{niter}{is number of iterations. Defaults to 1e3.}
+\item{niter}{is number of iterations. Defaults to \code{niter = 1e3}. Default is generally only sufficient for models with only mean rates and no drivers.}
 
-\item{nthin}{sets the thinning, i.e. samples for each nthin iterations are stored as output. Defaults to 10.}
+\item{nthin}{sets the thinning, i.e. samples for each \code{nthin} iterations are stored as output. Defaults to \code{nthin = 10}.}
 
 \item{vmin}{sets the minimum and initial standard deviation of the normal proposals.}
 
-\item{draweps}{number of iterations between each update of the proposal covariance matrix. Defaults to niter/100}
+\item{draweps}{number of iterations between each update of the proposal covariance matrix. Defaults to \code{draweps = niter/100}.}
 
-\item{cvstp}{Covariance structure for proposal. This is tuned during burnin. Defaults to (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar))}
+\item{cvstp}{Covariance structure for proposal. This is tuned during burnin phase. Defaults to (2.38/(sqrt(cmrModel$npar)))^2*diag(vmin,cmrModel$npar))}
 
 \item{adapt}{Adapt the covariance proposals during first half?}
 
-\item{x_init}{Potential initial values for the chain. If not provided the initial mean rates are optimes using the probability density function and all other parameters set to 0.}
+\item{x_init}{Potential initial values for the chain. If not provided the initial mean rates are optimized using the probability density function and all other parameters set to 0.}
 }
 \value{
-a fit structure with $Chain for samples, $Probs for posterior probabilities, $Accept number of accepted proposals in each block, $Model is the CMRmodel supplied as input, $Covs is the proposal covariance structure used in the last half of the chain.
+A \code{CMR_fit} structure with \code{$Chain} for samples, \code{$Probs} for posterior probabilities, \code{$Accept} with number of accepted proposals in each block, \code{$Model} is the \code{CMR_model} supplied as input, \code{$Covs} is the proposal covariance structure used in the last half of the chain.
 }
 \description{
-After generating a model using \link{make_BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burning phase is used for proposals in the latter half, insert ref here.
+After generating a model using \link{make_BayesCMR}, this function will sample the posterior. Default settings work relatively well for smaller models, but output needs to be checked for convergence (and more iterations are often necessary for models with many parameters). The sampler uses a covariance scaling to achieve good mixing. First half of the iterations are burning, and continually the proposals widths are tuned. The covariance structure of the samples in this burnin phase is used for proposals in the latter half.
 }
