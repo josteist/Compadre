@@ -1,5 +1,5 @@
 Package: Compadre
-Title: Kick-ass Analysis of Macroevolutionary Rates of Speciation, Extinction and Sampling using Capture-Mark-Recapture techniques
+Title: Analysis of Macroevolutionary Rates of Speciation, Extinction and Sampling using Capture-Mark-Recapture techniques
 Version: 0.0.1
 Authors@R: 
     person(given = "Jostein",
@@ -12,4 +12,4 @@ Encoding: UTF-8
 LazyData: true
 Imports:
 	mvtnorm, coda
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

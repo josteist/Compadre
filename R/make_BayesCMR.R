@@ -7,9 +7,10 @@
 #' @param spec/ext/samp are formulas specifying the particular model. Use 'time' for temporally variable rates, 'div' for diversity dependence. Other drivers should have names as entries into \emph{data}
 #' @param data a data frame with putative drivers.
 #' @param pfix a switch to select which approach is used to solve the identifiability problem in the model. If \emph{pfix = 1}, then the sampling rate in the first and the last intervals are assumed to be equal to the mean sampling rate for the whole period. If \emph{pfix = 2}, then the first two intervals, and the last two intervals have the same sampling rate. Defaults to pfix = 2.
-#' @param priorsNorm_Cov sets the parameters for the normal prior for the impact of the drivers. Defaults to Norm(mu=0,sd=2).
-#' @param priorsNorm_Mus sets the parameters for the normal prior for the (log) mean speciation, extinction and sampling rates. Given as a list of three entries with (mu,sd). Defaults to rep(list(c(-4,4)),3), i.e. all normal priors with mu=-4 and sd=3.
-#' @param priorsUnif sets the parameters for the uniform prior for the log variances of the random efSpecTS. Same for all three variances, dunif(-3,3).
+#' @param priorsMu distribution used for prior for the baseline rates - a probability density function. Default is dnorm.
+#' @param priorsCov distribution used for prior for the driver coefficients - a probability density function. Default is dnorm.
+#' @param priorsStd distribution used for prior for log of the standard deviation of the random effects - a probability density function. Default is dunif.
+#' @param priorPars list of lists of the parameters for the priors: `list(list(paramaters for Mu), list(parameters for covariates), list(parameters for log(standard deviation of random effects)))`. Defaults to list(list(log(0.1),5),list(0,5),list(-3,3))
 #' @param modeltype sets the type parameterization of the rates of speciation and extinction. 'I' and 'II' specifies that the probabilities of extinction and seniority are calculated based on actual durations of intervals, whereas 'III' and 'IV' uses the differences between mid-points of intervals. 'I' and 'III' uses a basic implementation of probability of extinction as 1 - exp(-rate * dt). Models 'II' and 'IV' use a more detailed functional relationship between rate and probability, following Raup (1984):  (µ*((exp((lambda-µ)*dt))-1))/(lambda*((exp((lambda-µ)*dt)))-µ). Modeltype 'V' implements a temporally uninformed model, estimating the probabilities directly (or rather their logit).
 #' @return The function returns an object of class CMR_model. This most important output is out$probfun which is a function for the posterior. This output can be fed directly into the sampler \link{MCMC_CMR}. It also returns \emph{Obs} and \emph{dts} as well as the full call (exlcluding default settings), \emph{call}
 #' @export
@@ -27,7 +28,7 @@ make_BayesCMR <- function(Obs,dts=rep(1,dim(Obs)[2]),
                           priorCov = dnorm,
                           priorStd = dunif,
                           priorPars = list(list(log(0.1),5),list(0,5),list(-3,3)),
-                          replRE_1 = F,modeltype='III'){
+                          modeltype='III'){
 
   # Model generating function for a Compadre analysis.
   # Minimum input is a matrix of observed/unobserved of dimensions
