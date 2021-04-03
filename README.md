@@ -41,20 +41,22 @@ Obs = (1*(Occ_species>0))[,do]
 Obs <- Obs[which(rowSums(Obs)>0),] 
 ```
 
-There are 14912 species in this dataset.
+There are 15 021 species in this dataset
 ```
 head(Obs) # Just to show the structure of the input.
 
-                           Hettangian Sinemurian Pliensbachian Toarcian Aalenian Bajocian
-Aviculopecten occidentalis          0          0             0        0        0        0
-Pleuromya uniformis                 0          1             1        1        1        1
-Rouillieria michalkowii             0          0             0        0        0        0
-Pinna (Pinna) lanceolata            0          0             0        0        0        0
-Goniomya literata                   0          0             0        1        0        0
-Idonearca capax                     0          0             0        0        0        0
+                                      Hettangian Sinemurian Pliensbachian Toarcian Aalenian Bajocian Bathonian Callovian Oxfordian
+Aviculopecten occidentalis                     0          0             0        0        0        0         0         0         0
+Pleuromya uniformis                            0          1             1        1        1        1         1         1         1
+Rouillieria michalkowii                        0          0             0        0        0        0         0         0         0
+Pinna (Pinna) lanceolata                       0          0             0        0        0        0         0         0         1
+Grammatodon (Cosmetodon) keyserlingii          0          0             0        0        0        0         0         0         1
+Goniomya literata                              0          0             0        0        1        0         1         1         1
 
 
-plot(max(stages[do,]$max_ma)-cumsum(dts),colSums(Obs>0),type="o",ylab='# species',xlab='Ma',
+# Making a mid-point time reference for plotting
+stages$midp = (stages$max_ma + stages$min_ma)/2
+plot(stages[do,]$midp,colSums(Obs>0),type="o",ylab='Number of observed species',xlab='Million years ago',
      xlim=(rev(range(max(stages[do,]$max_ma)-cumsum(dts)))))
 colbottom(stages[do,]) 
 # This simple function adds colors at the bottom, from the stages data.frame
@@ -76,16 +78,14 @@ fa <- MCMC_CMR(ma,niter=1e4)
 # Written output:
 summary(fa)
 	 	 	=== Speciation rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.18	  0.17	  0.18	  0.18	  0.00	407.97	
-
+              mean  2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.107 0.105  0.107 0.109       0    225
 	 	 	=== Extinction rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.18	  0.17	  0.18	  0.18	  0.00	407.44	
-
+              mean  2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.106 0.104  0.106 0.108       0    252
 	 	 	=== Sampling rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.15	  0.14	  0.15	  0.15	  0.00	414.58	
+              mean  2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.151 0.146  0.151 0.155       0    316
 ```
 Not surprisingly the rates of extinction and speciation are very similar. However, mean rates over many transitions are of course potentially very misleading measures of diversification. The last two columns show the probability of being 'significant', i.e. fraction of samples > or < 0, and effective sample sizes (says something about the convergence of the MCMC chain).
 
@@ -106,10 +106,9 @@ When generating the model using make_BayesCMR each rate can be defined by a form
 ` ~ time` (add a random deviation from the overall rate to each transition)
 ` ~ div`  (add a diversity-dependent term. 
 
-Diversity is roughly estimated as # obs / sampling prob. Diversity can not impact, sampling rates, which are used for diversity estimation. An intercept for each rate is included by default. Also note that all drivers, including diversity, are normalized so parameters reflect relative importance as drivers. Lastly, all rates are implemented and estimated on the log-scale
+Diversity is  estimated as # obs / sampling prob. Diversity can not impact sampling rates which are used for diversity estimation. An intercept for each rate is included by default. Also note that all drivers, including diversity, are normalized so parameters reflect relative importance as drivers. Lastly, all rates are implemented and estimated on the log-scale.
 
-More complex models take longer to estimate. Here speciation rates vary over time (they are not 'functions' of time as in + alpha*time, but this makes
-the model include a random effect per interval transition.)
+More complex models take longer to sample. Here speciation rates vary over time (they are not 'functions' of time as in + alpha*time, but this makes the model include a random effect per interval transition.)
 
 ```
 mb <- make_BayesCMR(Obs,dts,
@@ -117,10 +116,10 @@ mb <- make_BayesCMR(Obs,dts,
 # Also you can call the model, and it will print out some basic info about it.
 mb
 
- == Compadre model == 
-Model includes  14912  taxa, spanning  23  intervals. 
-The model was generated Tue Jul 09 15:17:10 2019 and has 26 parameters.
-
+  == Compadre model == 
+Model includes  15021  taxa, spanning  23  intervals. 
+The model was generated Sat Apr 03 08:09:43 2021 and has 26 parameters.
+Model is of type  III . See ?make_BayesCMR for details.
  ==  Model terms  == 
 Speciation ~ time 
 Extinction ~ 1 
@@ -131,16 +130,16 @@ fb <- MCMC_CMR(mb,niter=1e5)
 # niter gives the number of MCMC iterations. By defualt first half is burnin and it tunes a proposal distribution to generate good mixing. 
 summary(fb)
 	 	 	=== Speciation rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.17	  0.14	  0.17	  0.19	  0.00	119.45	
+               mean   2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.0993 0.0843 0.0985 0.118       0   62.7
 
 	 	 	=== Extinction rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.17	  0.17	  0.17	  0.18	  0.00	182.02	
+              mean 2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.102  0.1  0.102 0.104       0    258
 
 	 	 	=== Sampling rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.14	  0.14	  0.14	  0.15	  0.00	316.56	
+              mean  2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.144 0.139  0.144 0.149       0    231
 
 plot(fb)
 ```
@@ -152,9 +151,9 @@ i.e. if the parameters is estimated properly. A crude rule of thumb is
 that the ESS should be > 200 for all parameters. ESS can be glanced from a summary for the main
 parameters, and evaluated for all (including the random effects for each interval) by using the function ESS(fit).
 
-Also note that the plot function outputs the sampled rates;
+Also note that the plot function outputs the sampled rates (and drawing of the plot is skipped by `drawplot=FALSE`)
 ```
-tmp <- plot(fb)
+tmp <- plot(fb,drawplot=FALSE)
 names(tmp)
 "SpecRates" "ExtRates"  "SampRates"
 
@@ -170,7 +169,7 @@ plot(fb,log=F,stages=stages[do,])
 ```
 ![figcolors](https://github.com/josteist/Compadre/blob/master/extra/fig5.png)
 
-Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals (plotted inside intervals), but speciation/extinction rates are for transitions (plotted ON the interval limits). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
+Here you see that the plots show one of the key assumptions of a CMR model; sampling rates are within intervals (plotted inside intervals), but speciation/extinction rates are for transitions (plotted ON the vertical lines separating intervals). Also, it is evident that doing analysis with temporally variable rate are of course to be preferred, given the data is sufficient. 
 
 ### A model including other drivers and diversity dependence
 Each rate is defined as a separate function/formula and can also have interactions.
@@ -178,35 +177,33 @@ Each rate is defined as a separate function/formula and can also have interactio
 ```
 mc <- make_BayesCMR(Obs,dts,
                     spec = ~ div + d13C + time,
-                    ext  = ~ d180_cor + time,
+                    ext  = ~ d18O + time,
                     samp = ~ time,
                     data = drivers)
 ```
-The drivers are extracted from the `data` inputted, but `div` and `time` are internal to the package and no entry in the data is needed (and also, please
-avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so their relative importance is directly summarized by the estimated parameters. You could of course back-transform if you're interested in the actual effect sizes. Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of speciation rate when the driver is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean.
+The drivers are extracted from the `data` inputted, but `div` and `time` are internal to the package and no entry in the data is needed (and also, probably best to avoid using variables with these names). All drivers a normalized to a mean of 0 and sd of 1 before estimation, so their relative importance is directly summarized by the estimated parameters. You could of course back-transform if you're interested in the actual effect sizes. Diversity is also normalized. All rates are estimated on the log-scale, so their impact is proportional, i.e. a parameter estimate of 1 leads to a doubling of speciation rate when the driver is 1 sd above mean, and a halfing of the rate when it's 1 sd below the mean.
 
-Formulas are generic and also allows for interactions between the drivers. If you think that impact of diversity on speciation rates are more important 
-with higher d13C values, then `spec = ~div*d13C` will estimate impacts of both drivers and their interaction. 
+Formulas are generic and also allows for interactions between the drivers. If you think that impact of diversity on speciation rates are more important with higher d13C values, then `spec = ~div*d13C` will estimate impacts of both drivers and their interaction. 
 
 ```
 fc <- MCMC_CMR(mc,niter=1e6)
 summary(fc)
 	 	 	=== Speciation rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				 0.14	 0.11	 0.14	 0.18	 0.00	103.17	
-div					-0.45	-0.68	-0.45	-0.21	 0.00	38.37	
-d13C					3.8e-01	1.1e-01	3.7e-01	7.3e-01	2.1e-03	1.3e+02	
+               mean    2.5% median  97.5% p >/<0  Eff SS
+Overall rate  0.107  0.0841  0.106 0.1314  0.0000  142.6
+div          -0.229 -0.4899 -0.237 0.0655  0.0587   60.6
+d13C          0.194 -0.0590  0.198 0.4544  0.0713  118.7
 
 	 	 	=== Extinction rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.17	  0.12	  0.17	  0.25	  0.00	119.81	
-d180_cor				 -0.212	 -0.553	 -0.208	  0.108	  0.096	264.343	
+                mean    2.5%  median    97.5% p >/<0  Eff SS
+Overall rate  0.0981  0.0709  0.0969  0.12755  0.0000    101
+d18O         -0.2477 -0.5121 -0.2463 -0.00814  0.0233    128
 
 	 	 	=== Sampling rate parameters ===
-       					mean	2.5%	median	97.5%	p >/<0 	Eff SS	
-Overall rate				  0.131	  0.097	  0.129	  0.174	  0.000	148.828	
+              mean  2.5% median 97.5% p >/<0  Eff SS
+Overall rate 0.145 0.106  0.143 0.189       0    112
 
-plot(fc) 
+plot(fc,stages=stages[do,]) 
 
 ```
 
@@ -220,14 +217,14 @@ plotDrivers(fc)
 ![figdriv1](https://github.com/josteist/Compadre/blob/master/extra/drivers1.png)
 ![figdriv2](https://github.com/josteist/Compadre/blob/master/extra/drivers2.png)
 
-Here it seems like diversity has a negative impact on speciation rate, `d13C` a positive one. And perhaps a positive impact of `d180_cor` on extinctions rate, but most likely not significant (or rather the credibility interval includes 0). Also note that the effective sample size for `d13C` is rather low, so here I would re-run with more iterations. 
+Here it seems like diversity has a negative impact on speciation rate and `d13C` a positive one, but the 95% credibility interval for both includes 0. There is a negative impact of `d18O` on extinctions rat, and in this case the credibility interval doees not include 0. Note that the effective sample size for some of the drivers are somewhat low, so here I would re-run with more iterations. 
 
 #### Inspecting the MCMC-chain
 
 You can also plot the chains to check for convergence. Large models might require relatively long runs, particularly with many drivers.
 ```
-# First three are the 'mean' rates:
-matplot(fc$Chain[,1:3],type="l")
+# First three are the 'mean' rates, on a log scale:
+matplot(fc$Chain[,1:3],type="l",ylab='alpha - overall log rate',xlab='iteration')
 ```
 
 ![figchains](https://github.com/josteist/Compadre/blob/master/extra/chains.png)
@@ -240,7 +237,7 @@ $specInx
           1           4           5 
 
 $extInx
-(Intercept)    d180_cor 
+(Intercept)        d18O 
           2           6 
 
 $sampInx
@@ -260,9 +257,15 @@ $sampReInx
  [1] 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74
 
 ```
-So the samples for the `d18_cor` impact on extinction rate is in `fc$Chain[,6]`. `varInx` are indexes for the standard deviations of the random effects for speciation, extinction and sampling (here 7,8 and 9). `**ReInx` are the indexes for the random effects.
+So the samples for the `d18O` impact on extinction rate is in `fc$Chain[,6]`. `varInx` are indexes for the standard deviations of the random effects for speciation, extinction and sampling (here 7,8 and 9). `**ReInx` are the indexes for the random effects.
 
 
-## In development.
-This package is not entirely finished yet, but most functionality should be there. If you experience troubles, have tips or comments, feel free to contact me. 
+## About the package
+The general approach and methodological details are presented in **Compadre - estimating the drivers and dynamics of macroevolutionary change** submitted to Systematic Biology.
+
+If you discover bugs or have wishes for improvements or changes, please do not hesitate to contact me. I'm also always in the mood for interesting collaborations.
+
+
+
+
 
