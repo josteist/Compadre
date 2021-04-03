@@ -260,6 +260,43 @@ $sampReInx
 So the samples for the `d18O` impact on extinction rate is in `fc$Chain[,6]`. `varInx` are indexes for the standard deviations of the random effects for speciation, extinction and sampling (here 7,8 and 9). `**ReInx` are the indexes for the random effects.
 
 
+## Model selection
+The approach also allows for model comparison by using Bayes factors. Using the same data we can compare a model with diversity-dependence (`md1`) vs one without (`md0`).
+
+```
+md0 <- make_BayesCMR(Obs,dts,
+                    spec = ~ time,
+                    ext  = ~ time,
+                    samp = ~ time,
+                    data = drivers)
+md1 <- make_BayesCMR(Obs,dts,
+                    spec = ~ div + time,
+                    ext  = ~ time,
+                    samp = ~ time,
+                    data = drivers)
+                    
+fd0 <- MCMC_CMR(md0,niter=1e6)
+fd1 <- MCMC_CMR(md1,niter=1e6)
+```
+To have sufficient evidence for the impact of diversity on speciation rates then i) the posterior distribution of the parameter should be different from 0 and ii) a model incorporating the driver should perform better in terms of model probability or likelihood. The package includes functions to estimate the Bayesian model likelihood by using importance sampling techniques. 
+
+To get the log Bayesian Model Likelihood (BML) we use the function `doBML(CMR_fit)`. Since the BML is a sample from a distribution, a relatively large number of samples are needed. Here we draw 10 replicates for each model fit using default settings. The `replicate` below calls the function `doBML` 10 times and keeps the output `$logBML` for each replicate.
+
+```
+bml0 <- replicate(10,doBML(fd0)$logBML)
+bml1 <- replicate(10,doBML(fd1)$logBML)
+
+```
+If we treat these two models as *a priori* equally likely, the Bayes factor when comparing them will be equal to the ratio of their Bayesian Model Likelihoods, and hence the different in their *log* BML. A different in logBML of 1-3 can be considered positive evidence, 3-5 strong evidence and a difference in logBML of > 5 can be seen as very strong (see Kass & Raftery 1995). A logBML difference of 3 corresponds to a Bayes Factor of approximately 20.
+
+Plotting the draws of the logBML for both models above shows lack of evidence for the more complex model (including diversity-dependence). In this case there is insufficient evidence to conclude that diversity-dependence in rates of speciation is an important driver.
+
+```
+boxplot(data.frame(H0=bml0,DivDep=bml1),ylab='log Bayesian Model Likelihood')
+grid()
+```
+![figbmls](https://github.com/josteist/Compadre/blob/master/extra/bmls.png)
+
 ## About the package
 The general approach and methodological details are presented in **Compadre - estimating the drivers and dynamics of macroevolutionary change** submitted to Systematic Biology.
 
