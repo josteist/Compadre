@@ -19,7 +19,8 @@ The basic input to a model is a matrix of 0/1 for observed taxa over intervals a
 
 First a simple example on diversification during the Jurassic & Cretaceous.
 
-Extract the geological stages from the in-package timescale (`GSA_timescale`) and invertebrate fossil database (`InvertPBDB`). Drivers are extracted from data.frame `Proxies`.
+Extract the geological stages from the in-package timescale (`GSA_timescale`) and invertebrate fossil database (`Occ_species` and `Occ_genera`). Drivers are extracted from data.frame `Proxies`. `Occ_species` is the big observation matrix of species level data from Paleobiology database included in the package. A similar matrix (`Occ_genera`) is also attached for genera. See details in main reference.
+
 ```
 # GSA_timescale is internal to the package. scale_level 5 is stages. Identical to timescale used by PBDB
 stages = GSA_timescale[GSA_timescale$scale_level==5,] 
@@ -34,8 +35,8 @@ drivers <- Proxies[do,]
 # Getting the durations of the intervals
 dts = stages[do,]$max_ma-stages[do,]$min_ma 
 
-# Extracting the species level invert data to relevant times. InvertPBDB is the big matrix included in the package.
-Obs = (1*(InvertPBDB>0))[,do] 
+# Extracting the species level invert data to relevant times. 
+Obs = (1*(Occ_species>0))[,do] 
 # Removing the ones not observed in the Mesozoic
 Obs <- Obs[which(rowSums(Obs)>0),] 
 ```
