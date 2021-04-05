@@ -4,6 +4,9 @@
 #' @param Sim1 Output from sim_bd_func
 #' @export
 plot.cmr_simulation <- function(Sim1,drawplot=T){
+  if (is.null(dim(Sim1$Taxa)[1])){
+    stop("Only 1 taxa in simulation")
+  }
   x <- c(0,sort(Sim1$Taxa[Sim1$Taxa>0 & Sim1$Taxa<max(Sim1$Taxa)]))
   y <- c(sum(Sim1$Taxa[,1]==0),
          sum(Sim1$Taxa[,1]==0) + cumsum(sapply(2:length(x),function(ii){(x[ii] %in% Sim1$Taxa[,1])*1 - (x[ii] %in% Sim1$Taxa[,2])})))
