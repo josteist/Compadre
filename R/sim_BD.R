@@ -129,7 +129,7 @@ sim_BD <- function(spec=0.1,
 
   }
   # Now we have the durations of all taxa.
-  if (!is.null(dim(sim$Taxa))){# if more than one taxa
+  if (!is.null(dim(Taxa))){# if more than one taxa
     Taxa[is.na(Taxa[,2]),2] = sum(dt_ints) # set the ones that are alive to 'end' at end of time
     Taxa[Taxa[,2]==0,2] = sum(dt_ints)     # set the ones that are alive to 'end' at end of time
     Foss <- lapply(1:dim(Taxa)[1],function(ii){sampFosRec(Taxa[ii,1],Taxa[ii,2],samp)});
