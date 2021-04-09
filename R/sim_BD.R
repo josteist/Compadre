@@ -132,6 +132,7 @@ sim_BD <- function(spec=0.1,
   if (!is.null(dim(Taxa))){# if more than one taxa
     Taxa[is.na(Taxa[,2]),2] = sum(dt_ints) # set the ones that are alive to 'end' at end of time
     Taxa[Taxa[,2]==0,2] = sum(dt_ints)     # set the ones that are alive to 'end' at end of time
+    Taxa <- Taxa[!Taxa[,1]>(sum(dt_ints)),] # Remove all born after t-max
     Foss <- lapply(1:dim(Taxa)[1],function(ii){sampFosRec(Taxa[ii,1],Taxa[ii,2],samp)});
     FosRec <- array(0,c(sum(sapply(Foss,length)>0),length(dt_ints)));
 
