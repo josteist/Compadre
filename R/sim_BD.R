@@ -87,7 +87,7 @@ sim_BD <- function(spec=0.1,
     l = spec
     m = ext
     tmax = sum(dt_ints)
-    taxa = array(NA,dim=c(n_init^2,2))
+    taxa = array(NA,dim=c(max(100,n_init)^2,2))
     taxa[1:n_init,1] = 0;
     alive = 1:n_init;
     ntix = n_init+1; #place next individual here
