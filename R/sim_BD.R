@@ -49,9 +49,19 @@ sim_BD <- function(spec=0.1,
                                     spec(t_now+dxt,length(alive_now)))/2*length(alive_now),dxt));
         ex_now = max(0,rate2prob((ext(t_now,     length(alive_now))  +
                                     ext(t_now+dxt, length(alive_now)))/2*length(alive_now),dxt));
+          while (sp_now>0.25 | ex_now>0.25){
+            sp_now = max(0,rate2prob((spec(t_now,    length(alive_now)) +
+                                        spec(t_now+dxt,length(alive_now)))/2*length(alive_now),dxt));
+            ex_now = max(0,rate2prob((ext(t_now,     length(alive_now))  +
+                                        ext(t_now+dxt, length(alive_now)))/2*length(alive_now),dxt));
+            dxt = dxt/2; # half the stepsize
+            print(c(sp_now,ex_now,event,t_now/sum(dt_ints),dxt))
+          }
+
         event <- sample.int(3,1,prob=c(1-(sp_now+ex_now),sp_now,ex_now));
         #if 1 (nothing), 2 speciate, 3 die
         # Random who it happens to
+        # THe above doesn't work when a rate suddently increaseses drastically - then the probs are too big.
         if (event==1){         # Nothing happened
           t_now = t_now + dxt
         } else if (event==2){  # Speciation event.
