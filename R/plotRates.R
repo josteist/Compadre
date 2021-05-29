@@ -18,6 +18,8 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
   if (drawplot){
   olp <- par(no.readonly = TRUE);
   on.exit(par(olp))
+  par(mfrow=c(3,1),mar=c(2,4,.2,1))
+
   }
   if (!is.null(stages)){
     # If stages are given, take the max as the xmax
@@ -36,7 +38,6 @@ plotRates <- function(cmrfit,max_ma= NULL,stages =NULL,logax = T,draws = 250,qua
     } else {
       tpl = draws
     }
-    par(mfrow=c(3,1),mar=c(2,4,.2,1))
     if (cmrfit$Model$modeltype %in% c("I","II","III","IV")){
       # extracting spc rate quantile
       spec_smps <- exp((sapply(1:length(tpl),function(ii){
